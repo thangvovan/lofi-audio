@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-19T05:22:00Z",
+  "title": "Design System: Lofi Radio",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Radiant Neon Red",
+        "canonical": "oklch(58% 0.23 10)",
+        "tonalRamp": ["#400b14", "#7b1021", "#ad1d33", "#d6354f", "#e94560", "#f1758a", "#f7a4b3", "#fcd4dc"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Soft Deep Violet",
+        "canonical": "oklch(33% 0.18 290)",
+        "tonalRamp": ["#130922", "#281545", "#3e2264", "#533483", "#6c4ba5", "#8b6bc7", "#ae91e5", "#d6c5fa"]
+      },
+      "tertiary": {
+        "role": "tertiary",
+        "displayName": "Deep Teal",
+        "canonical": "oklch(29% 0.12 250)",
+        "tonalRamp": ["#020b17", "#05182e", "#0a2647", "#0f3460", "#18497d", "#24619a", "#3b7eb8", "#5c9fd6"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Space Charcoal",
+        "canonical": "oklch(14% 0.03 260)",
+        "tonalRamp": ["#030307", "#07070e", "#0d0d1a", "#1b1b33", "#2e2e54", "#4a4a7d", "#7272a8", "#a6a6d1"]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Tape Deck Navy",
+        "canonical": "oklch(18% 0.04 260)",
+        "tonalRamp": ["#06060b", "#0d0d17", "#1a1a2e", "#2e2e50", "#484877", "#6b6b9f", "#9696c7", "#c7c7e5"]
+      },
+      "neutral-text": {
+        "role": "neutral",
+        "displayName": "Cloud Gray",
+        "canonical": "oklch(93% 0.005 260)",
+        "tonalRamp": ["#1a1a1a", "#333333", "#666666", "#999999", "#cccccc", "#eaeaea", "#f5f5f5", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Title",
+        "purpose": "Active channel names on full-screen player."
+      },
+      "headline": {
+        "displayName": "Section Headline",
+        "purpose": "Primary headers for groupings/categories."
+      },
+      "title": {
+        "displayName": "Channel Title",
+        "purpose": "Channel card list labels."
+      },
+      "body": {
+        "displayName": "Body Text",
+        "purpose": "Short descriptions, descriptions, and statuses."
+      },
+      "label": {
+        "displayName": "Consoles Labels",
+        "purpose": "Badges, console meters, and timestamps."
+      }
+    },
+    "shadows": [
+      {
+        "name": "Neon Glow",
+        "value": "0 0 20px rgba(233, 69, 96, 0.15)",
+        "purpose": "Visual glow representing a warm active vacuum tube/audio light."
+      },
+      {
+        "name": "Ambient Shadow",
+        "value": "0 4px 12px rgba(0, 0, 0, 0.3)",
+        "purpose": "Elevation shadow for floating Mini Player."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Smooth transition deceleration for panels, cards and play state active glows."
+      }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Channel Card",
+      "kind": "card",
+      "refersTo": "channel-card",
+      "description": "Nostalgic channel display card with aspect ratio 16/10",
+      "html": "<div class=\"ds-channel-card ds-active\"><div class=\"ds-thumbnail\"><span class=\"ds-badge\">LIVE</span></div><div class=\"ds-title\">lofi hip hop radio</div></div>",
+      "css": ".ds-channel-card { background: #1A1A2E; border-radius: 16px; aspect-ratio: 16/10; position: relative; overflow: hidden; font-family: Outfit, sans-serif; } .ds-channel-card.ds-active { border: 1.5px solid rgba(233, 69, 96, 0.6); box-shadow: 0 0 20px rgba(233, 69, 96, 0.15); } .ds-thumbnail { width: 100%; height: 100%; background: #0D0D1A; } .ds-badge { position: absolute; top: 10px; right: 10px; background: #E94560; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; letter-spacing: 0.05em; } .ds-title { position: absolute; bottom: 12px; left: 12px; color: #EAEAEA; font-size: 18px; font-weight: 500; }"
+    },
+    {
+      "name": "Mini Player",
+      "kind": "custom",
+      "refersTo": "mini-player",
+      "description": "Floating overlay mini player with control integrations",
+      "html": "<div class=\"ds-mini-player\"><div class=\"ds-mini-info\"><div class=\"ds-mini-art\"></div><div><div class=\"ds-mini-title\">lofi hip hop radio</div><div class=\"ds-mini-subtitle\">Lofi Girl</div></div></div><button class=\"ds-btn-play\"></button></div>",
+      "css": ".ds-mini-player { background: rgba(26, 26, 46, 0.95); border-radius: 16px; border: 0.5px solid rgba(83, 52, 131, 0.3); padding: 12px 12px 10px 12px; display: flex; align-items: center; justify-content: space-between; font-family: Outfit, sans-serif; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); } .ds-mini-info { display: flex; align-items: center; gap: 12px; } .ds-mini-art { width: 40px; height: 40px; background: #0d0d1a; border-radius: 8px; } .ds-mini-title { color: #EAEAEA; font-size: 14px; font-weight: 500; } .ds-mini-subtitle { color: rgba(234, 234, 234, 0.6); font-size: 12px; } .ds-btn-play { width: 36px; height: 36px; border-radius: 50%; background: #E94560; border: none; cursor: pointer; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Synthwave Sanctuary",
+    "overview": "Lofi Radio is designed as a digital sanctuary for users seeking focus, relaxation, or sleep. The visual language balances a nostalgic, low-fidelity analog feel with a sleek, modern cyberpunk aesthetic. The layout uses defined outlines, translucent panels, and neon-lit highlights floating on top of deep midnight spaces. The density of the interface is loose, spacious, and calming, reducing visual noise to a absolute minimum.\n\nThis system explicitly rejects bright light themes, stark white cards, and aggressive neon gradients that strain the eyes in dark environments. It favors quiet, glowing indicators over constant, flashing movements.",
+    "keyCharacteristics": [
+      "Dimmed Stacking Context: Immersive dark blue-black backgrounds layer with semi-transparent navy containers to establish a flat, low-contrast hierarchy.",
+      "Neon Accents: Radiant Neon Red (#E94560) is used sparingly as the primary highlight color to denote interactive states and active playback.",
+      "Atmospheric Depth: Subtle backdrop blurs and radial gradients create a sense of floating, neon-lit panels in space."
+    ],
+    "rules": [
+      {
+        "name": "The Rarity Rule",
+        "body": "The primary accent (#E94560) must occupy ≤5% of any screen surface. It serves as an active spark, not a fill color.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-White Rule",
+        "body": "True white (#FFFFFF) is prohibited for body text or large panels. All text must use Cloud Gray (#EAEAEA) or dimmed opacities to preserve night-time comfort.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Containers do not have shadows at rest. Shadow and glow are state-driven responses to user interaction or playback status.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use translucent navy containers (#1A1A2E at 95% opacity) over the charcoal background to create visual depth.",
+      "Do keep text sizes small and clean, relying on weight variation (Bold/Regular) rather than extreme size scaling.",
+      "Do bound visualizer animation counts and frequencies to a calm, steady wave, matching a low-frequency state."
+    ],
+    "donts": [
+      "Don't use bright light backgrounds or high-contrast primary colors that could disrupt a dark room.",
+      "Don't use solid saturated neon blocks or neon text gradients. Accent color should only light up key outlines or states.",
+      "Don't animate elements on hover/focus using sharp curves or bounce effects; use linear or ease-out curves to preserve tranquility."
+    ]
+  }
+}
