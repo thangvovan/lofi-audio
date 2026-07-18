@@ -192,8 +192,8 @@ class _ControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String semanticLabel = icon == Icons.skip_previous_rounded
-        ? 'Bài trước'
-        : 'Bài tiếp theo';
+        ? 'Kênh trước'
+        : 'Kênh tiếp theo';
 
     return Semantics(
       label: semanticLabel,
