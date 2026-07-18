@@ -89,7 +89,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Expanded(
                       child: provider.isLoadingPlaylist
-                          ? _buildShimmerGrid()
+                          ? _buildShimmerGrid(context)
                           : (provider.error != null && provider.channels.isEmpty
                               ? _buildError(context, provider)
                               : _buildChannelGrid(context, provider)),
@@ -174,6 +174,14 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildChannelGrid(BuildContext context, AudioProvider provider) {
+    final width = MediaQuery.of(context).size.width;
+    int crossAxisCount = 2;
+    if (width >= 900) {
+      crossAxisCount = 4;
+    } else if (width >= 600) {
+      crossAxisCount = 3;
+    }
+
     return RefreshIndicator(
       color: AppColors.primary,
       backgroundColor: AppColors.surface,
@@ -189,8 +197,8 @@ class HomeScreen extends StatelessWidget {
               ? MediaQuery.of(context).padding.bottom + 90
               : MediaQuery.of(context).padding.bottom + 16,
         ),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
           childAspectRatio: 16 / 13,
@@ -220,11 +228,19 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmerGrid() {
+  Widget _buildShimmerGrid(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    int crossAxisCount = 2;
+    if (width >= 900) {
+      crossAxisCount = 4;
+    } else if (width >= 600) {
+      crossAxisCount = 3;
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
         childAspectRatio: 16 / 13,

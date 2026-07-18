@@ -81,94 +81,179 @@ class PlayerScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-
-                    // App bar
-                    _buildAppBar(context),
-                    const Spacer(flex: 1),
-
-                    // Album art (Animated Pixel Cassette Player)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Hero(
-                        tag: 'player_thumbnail',
-                        child: Material(
-                          color: Colors.transparent,
-                          child: PixelCassettePlayer(
-                            isPlaying: provider.isPlaying,
-                            isLoading: provider.isLoadingStream,
-                            title: channel.title,
-                            onTap: provider.togglePlayPause,
-                          ),
-                        ),
+                    Expanded(
+                      child: OrientationBuilder(
+                        builder: (context, orientation) {
+                          return orientation == Orientation.landscape
+                              ? _buildLandscapeLayout(context, channel, provider)
+                              : _buildPortraitLayout(context, channel, provider);
+                        },
                       ),
                     ),
-                    const SizedBox(height: 32),
-
-                    // Title
-                    _buildTitle(context, channel),
-                    const SizedBox(height: 24),
-
-                    // Visualizer or Error Panel
-                    if (provider.error != null) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.error_outline_rounded,
-                                  color: AppColors.primary, size: 20),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  provider.error!,
-                                  style: const TextStyle(
-                                    color: AppColors.onSurface,
-                                    fontSize: 12,
-                                    height: 1.3,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.refresh_rounded,
-                                    color: AppColors.onSurface, size: 20),
-                                onPressed: () => provider.playChannel(channel),
-                                tooltip: 'Thử lại',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ] else ...[
-                      AudioVisualizer(
-                        isPlaying: provider.isPlaying,
-                        color: AppColors.primary,
-                        barCount: 32,
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: 50,
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-
-                    // Controls
-                    _buildControls(context, provider),
-                    const Spacer(flex: 2),
                   ],
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPortraitLayout(BuildContext context, dynamic channel, AudioProvider provider) {
+    return Column(
+      children: [
+        _buildAppBar(context),
+        const Spacer(flex: 1),
+
+        // Album art (Animated Pixel Cassette Player)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Hero(
+            tag: 'player_thumbnail',
+            child: Material(
+              color: Colors.transparent,
+              child: PixelCassettePlayer(
+                isPlaying: provider.isPlaying,
+                isLoading: provider.isLoadingStream,
+                title: channel.title,
+                onTap: provider.togglePlayPause,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        // Title
+        _buildTitle(context, channel),
+        const SizedBox(height: 24),
+
+        if (provider.error != null) ...[
+          _buildErrorPanel(context, provider, channel),
+          const SizedBox(height: 24),
+        ] else ...[
+          AudioVisualizer(
+            isPlaying: provider.isPlaying,
+            color: AppColors.primary,
+            barCount: 32,
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: 50,
+          ),
+          const SizedBox(height: 32),
+        ],
+
+        // Controls
+        _buildControls(context, provider),
+        const Spacer(flex: 2),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeLayout(BuildContext context, dynamic channel, AudioProvider provider) {
+    return Column(
+      children: [
+        _buildAppBar(context),
+        Expanded(
+          child: Row(
+            children: [
+              // Left half: Cassette Player + Visualizer
+              Expanded(
+                flex: 5,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Hero(
+                        tag: 'player_thumbnail',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 320),
+                            child: PixelCassettePlayer(
+                              isPlaying: provider.isPlaying,
+                              isLoading: provider.isLoadingStream,
+                              title: channel.title,
+                              onTap: provider.togglePlayPause,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (provider.error == null)
+                      AudioVisualizer(
+                        isPlaying: provider.isPlaying,
+                        color: AppColors.primary,
+                        barCount: 24,
+                        width: 260,
+                        height: 32,
+                      ),
+                  ],
+                ),
+              ),
+              // Right half: Title + Controls + Error state
+              Expanded(
+                flex: 5,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildTitle(context, channel),
+                    const SizedBox(height: 16),
+                    if (provider.error != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: _buildErrorPanel(context, provider, channel),
+                      ),
+                    const SizedBox(height: 16),
+                    _buildControls(context, provider),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorPanel(BuildContext context, AudioProvider provider, dynamic channel) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded,
+                color: AppColors.primary, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                provider.error!,
+                style: const TextStyle(
+                  color: AppColors.onSurface,
+                  fontSize: 12,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded,
+                  color: AppColors.onSurface, size: 20),
+              onPressed: () => provider.playChannel(channel),
+              tooltip: 'Thử lại',
+            ),
+          ],
         ),
       ),
     );
