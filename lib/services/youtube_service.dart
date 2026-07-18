@@ -4,6 +4,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_explode_dart/src/reverse_engineering/youtube_http_client.dart' as ythtp;
 import 'package:youtube_explode_dart/src/videos/video_controller.dart';
 import 'package:youtube_explode_dart/src/videos/youtube_api_client.dart';
+import 'package:flutter/foundation.dart';
 import '../models/lofi_channel.dart';
 
 class YoutubeService {
@@ -89,7 +90,7 @@ class YoutubeService {
         return response.hlsManifestUrl!;
       }
     } catch (e) {
-      print('Android playerResponse stream extraction failed: $e. Falling back to standard YoutubeExplode streams.');
+      debugPrint('Android playerResponse stream extraction failed: $e. Falling back to standard YoutubeExplode streams.');
     } finally {
       httpClient.close();
     }
