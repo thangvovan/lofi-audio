@@ -99,15 +99,58 @@ class PlayerScreen extends StatelessWidget {
                     _buildTitle(context, channel),
                     const SizedBox(height: 24),
 
-                    // Visualizer
-                    AudioVisualizer(
-                      isPlaying: provider.isPlaying,
-                      color: AppColors.primary,
-                      barCount: 32,
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      height: 50,
-                    ),
-                    const SizedBox(height: 32),
+                    // Visualizer or Error Panel
+                    if (provider.error != null) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.error_outline_rounded,
+                                  color: AppColors.primary, size: 20),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  provider.error!,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    height: 1.3,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.refresh_rounded,
+                                    color: Colors.white70, size: 20),
+                                onPressed: () => provider.playChannel(channel),
+                                tooltip: 'Thử lại',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ] else ...[
+                      AudioVisualizer(
+                        isPlaying: provider.isPlaying,
+                        color: AppColors.primary,
+                        barCount: 32,
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: 50,
+                      ),
+                      const SizedBox(height: 32),
+                    ],
 
                     // Controls
                     _buildControls(context, provider),
@@ -179,15 +222,6 @@ class PlayerScreen extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   height: 1.3,
                 ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Lofi Radio',
-            style: TextStyle(
-              color: AppColors.inactiveText,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
           ),
         ],
       ),
