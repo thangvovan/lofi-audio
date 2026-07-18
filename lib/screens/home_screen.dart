@@ -160,27 +160,6 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-          // Refresh button
-          Consumer<AudioProvider>(
-            builder: (context, provider, _) {
-              return IconButton(
-                onPressed:
-                    provider.isLoadingPlaylist ? null : provider.loadPlaylist,
-                icon: provider.isLoadingPlaylist
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.inactiveText,
-                        ),
-                      )
-                    : const Icon(Icons.refresh_rounded,
-                        color: AppColors.inactiveText),
-                tooltip: 'Tải lại',
-              );
-            },
-          ),
         ],
       ),
     );
