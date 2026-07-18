@@ -7,6 +7,7 @@ import 'providers/audio_provider.dart';
 import 'screens/home_screen.dart';
 import 'services/audio_handler.dart';
 import 'services/youtube_service.dart';
+import 'theme/app_colors.dart';
 
 late LofiAudioHandler audioHandler;
 
@@ -17,7 +18,7 @@ Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: Color(0xFF0D0D1A),
+    systemNavigationBarColor: AppColors.background,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
@@ -51,23 +52,17 @@ class LofiApp extends StatelessWidget {
   }
 
   ThemeData _buildTheme() {
-    const background = Color(0xFF0D0D1A);
-    const surface = Color(0xFF1A1A2E);
-    const primary = Color(0xFFE94560);
-    const secondary = Color(0xFF533483);
-    const onSurface = Color(0xFFEAEAEA);
-
     return ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: AppColors.background,
       colorScheme: const ColorScheme.dark(
-        primary: primary,
-        secondary: secondary,
-        tertiary: Color(0xFF0F3460),
-        surface: surface,
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        tertiary: AppColors.tertiary,
+        surface: AppColors.surface,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: onSurface,
+        onSurface: AppColors.onSurface,
       ),
       textTheme: GoogleFonts.outfitTextTheme(
         ThemeData.dark().textTheme,

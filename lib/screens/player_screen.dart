@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/audio_provider.dart';
+import '../theme/app_colors.dart';
 import '../widgets/audio_visualizer.dart';
 
 class PlayerScreen extends StatelessWidget {
@@ -29,7 +30,7 @@ class PlayerScreen extends StatelessWidget {
                 imageUrl: channel.maxThumbnailUrl,
                 fit: BoxFit.cover,
                 errorWidget: (context, url, error) =>
-                    Container(color: const Color(0xFF0D0D1A)),
+                    Container(color: AppColors.background),
               ),
               BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
@@ -39,9 +40,9 @@ class PlayerScreen extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFF0D0D1A).withValues(alpha: 0.6),
-                        const Color(0xFF0D0D1A).withValues(alpha: 0.85),
-                        const Color(0xFF0D0D1A).withValues(alpha: 0.95),
+                        AppColors.background.withValues(alpha: 0.6),
+                        AppColors.background.withValues(alpha: 0.85),
+                        AppColors.background.withValues(alpha: 0.95),
                       ],
                     ),
                   ),
@@ -67,7 +68,7 @@ class PlayerScreen extends StatelessWidget {
                     // Visualizer
                     AudioVisualizer(
                       isPlaying: provider.isPlaying,
-                      color: const Color(0xFFE94560),
+                      color: AppColors.primary,
                       barCount: 32,
                       width: MediaQuery.of(context).size.width * 0.8,
                       height: 50,
@@ -103,7 +104,7 @@ class PlayerScreen extends StatelessWidget {
                 Text(
                   'ĐANG PHÁT TỪ',
                   style: TextStyle(
-                    color: Color(0xFF8D8DAA),
+                    color: AppColors.inactiveText,
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 2,
@@ -139,7 +140,7 @@ class PlayerScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFE94560).withValues(alpha: 0.2),
+              color: AppColors.primary.withValues(alpha: 0.2),
               blurRadius: 40,
               offset: const Offset(0, 12),
             ),
@@ -162,9 +163,9 @@ class PlayerScreen extends StatelessWidget {
                   height: size,
                   fit: BoxFit.cover,
                   errorWidget: (context, url, error) => Container(
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.surface,
                     child: const Icon(Icons.music_note,
-                        color: Color(0xFF8D8DAA), size: 80),
+                        color: AppColors.inactiveText, size: 80),
                   ),
                 ),
               ),
@@ -179,11 +180,11 @@ class PlayerScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE94560),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFE94560).withValues(alpha: 0.5),
+                        color: AppColors.primary.withValues(alpha: 0.5),
                         blurRadius: 12,
                       ),
                     ],
@@ -217,7 +218,7 @@ class PlayerScreen extends StatelessWidget {
                     color: Colors.black45,
                     child: const Center(
                       child: CircularProgressIndicator(
-                        color: Color(0xFFE94560),
+                        color: AppColors.primary,
                         strokeWidth: 3,
                       ),
                     ),
@@ -250,7 +251,7 @@ class PlayerScreen extends StatelessWidget {
           const Text(
             'Lofi Radio',
             style: TextStyle(
-              color: Color(0xFF8D8DAA),
+              color: AppColors.inactiveText,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -299,11 +300,11 @@ class PlayerScreen extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFE94560), Color(0xFFBF3250)],
+            colors: [AppColors.primary, Color(0xFFBF3250)],
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFE94560).withValues(alpha: 0.4),
+              color: AppColors.primary.withValues(alpha: 0.4),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),

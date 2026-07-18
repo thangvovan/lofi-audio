@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../models/lofi_channel.dart';
+import '../theme/app_colors.dart';
 import 'audio_visualizer.dart';
 
 class ChannelCard extends StatelessWidget {
@@ -30,14 +31,14 @@ class ChannelCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: isCurrentlyPlaying
               ? Border.all(
-                  color: const Color(0xFFE94560).withValues(alpha: 0.6),
+                  color: AppColors.primary.withValues(alpha: 0.6),
                   width: 1.5,
                 )
               : null,
           boxShadow: isCurrentlyPlaying
               ? [
                   BoxShadow(
-                    color: const Color(0xFFE94560).withValues(alpha: 0.15),
+                    color: AppColors.primary.withValues(alpha: 0.15),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
@@ -55,15 +56,15 @@ class ChannelCard extends StatelessWidget {
                   imageUrl: channel.thumbnailUrl,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: const Color(0xFF1A1A2E),
-                    highlightColor: const Color(0xFF2A2A4E),
-                    child: Container(color: const Color(0xFF1A1A2E)),
+                    baseColor: AppColors.shimmerBase,
+                    highlightColor: AppColors.shimmerHighlight,
+                    child: Container(color: AppColors.surface),
                   ),
                   errorWidget: (context, url, error) => Container(
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.surface,
                     child: const Icon(
                       Icons.music_note,
-                      color: Color(0xFF8D8DAA),
+                      color: AppColors.inactiveText,
                       size: 40,
                     ),
                   ),
@@ -80,8 +81,8 @@ class ChannelCard extends StatelessWidget {
                       colors: [
                         Colors.transparent,
                         Colors.transparent,
-                        const Color(0xFF0D0D1A).withValues(alpha: 0.7),
-                        const Color(0xFF0D0D1A).withValues(alpha: 0.95),
+                        AppColors.background.withValues(alpha: 0.7),
+                        AppColors.background.withValues(alpha: 0.95),
                       ],
                       stops: const [0.0, 0.3, 0.7, 1.0],
                     ),
@@ -98,11 +99,11 @@ class ChannelCard extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE94560),
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(6),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFE94560).withValues(alpha: 0.4),
+                          color: AppColors.primary.withValues(alpha: 0.4),
                           blurRadius: 8,
                         ),
                       ],
@@ -135,13 +136,13 @@ class ChannelCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0D0D1A).withValues(alpha: 0.8),
+                      color: AppColors.background.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: isPlaying
                         ? const PlayingIndicator(size: 14)
                         : const Icon(Icons.pause,
-                            color: Color(0xFFE94560), size: 14),
+                            color: AppColors.primary, size: 14),
                   ),
                 ),
 

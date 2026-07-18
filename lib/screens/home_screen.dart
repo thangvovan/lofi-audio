@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../providers/audio_provider.dart';
+import '../theme/app_colors.dart';
 import '../widgets/channel_card.dart';
 import '../widgets/mini_player.dart';
 
@@ -21,9 +22,9 @@ class HomeScreen extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF16213E),
-                  Color(0xFF0D0D1A),
-                  Color(0xFF0D0D1A),
+                  Color(0xFF16213E), // Keeping this gradient base for rich atmosphere, or we can use AppColors.tertiary
+                  AppColors.background,
+                  AppColors.background,
                 ],
                 stops: [0.0, 0.4, 1.0],
               ),
@@ -41,7 +42,7 @@ class HomeScreen extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF533483).withValues(alpha: 0.15),
+                    AppColors.secondary.withValues(alpha: 0.15),
                     Colors.transparent,
                   ],
                 ),
@@ -58,7 +59,7 @@ class HomeScreen extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFFE94560).withValues(alpha: 0.08),
+                    AppColors.primary.withValues(alpha: 0.08),
                     Colors.transparent,
                   ],
                 ),
@@ -252,11 +253,11 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFE94560).withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
               ),
               child: const Icon(
                 Icons.wifi_off_rounded,
-                color: Color(0xFFE94560),
+                color: AppColors.primary,
                 size: 48,
               ),
             ),
@@ -272,7 +273,7 @@ class HomeScreen extends StatelessWidget {
             Text(
               'Kiểm tra kết nối mạng và thử lại',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF8D8DAA),
+                    color: AppColors.inactiveText,
                   ),
               textAlign: TextAlign.center,
             ),
@@ -282,7 +283,7 @@ class HomeScreen extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('Thử lại'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE94560),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 28, vertical: 14),

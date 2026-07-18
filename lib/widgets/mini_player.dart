@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/audio_provider.dart';
 import '../screens/player_screen.dart';
+import '../theme/app_colors.dart';
 import 'audio_visualizer.dart';
 
 class MiniPlayer extends StatelessWidget {
@@ -51,10 +52,10 @@ class MiniPlayer extends StatelessWidget {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E).withValues(alpha: 0.95),
+              color: AppColors.surface.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFF533483).withValues(alpha: 0.3),
+                color: AppColors.secondary.withValues(alpha: 0.3),
                 width: 0.5,
               ),
               boxShadow: [
@@ -64,7 +65,7 @@ class MiniPlayer extends StatelessWidget {
                   offset: const Offset(0, -4),
                 ),
                 BoxShadow(
-                  color: const Color(0xFFE94560).withValues(alpha: 0.05),
+                  color: AppColors.primary.withValues(alpha: 0.05),
                   blurRadius: 30,
                 ),
               ],
@@ -84,9 +85,9 @@ class MiniPlayer extends StatelessWidget {
                       errorWidget: (context, url, error) => Container(
                         width: 44,
                         height: 44,
-                        color: const Color(0xFF2A2A4E),
+                        color: AppColors.shimmerHighlight,
                         child: const Icon(Icons.music_note,
-                            color: Color(0xFF8D8DAA), size: 20),
+                            color: AppColors.inactiveText, size: 20),
                       ),
                     ),
                   ),
@@ -118,15 +119,15 @@ class MiniPlayer extends StatelessWidget {
                               height: 12,
                               child: CircularProgressIndicator(
                                 strokeWidth: 1.5,
-                                color: Color(0xFFE94560),
+                                color: AppColors.primary,
                               ),
                             )
                           else if (provider.isPlaying)
                             const PlayingIndicator(
-                                size: 12, color: Color(0xFFE94560))
+                                size: 12, color: AppColors.primary)
                           else
                             const Icon(Icons.pause,
-                                size: 12, color: Color(0xFF8D8DAA)),
+                                size: 12, color: AppColors.inactiveText),
                           const SizedBox(width: 6),
                           Text(
                             provider.isLoadingStream
@@ -135,7 +136,7 @@ class MiniPlayer extends StatelessWidget {
                                     ? 'Đang phát'
                                     : 'Tạm dừng',
                             style: const TextStyle(
-                              color: Color(0xFF8D8DAA),
+                              color: AppColors.inactiveText,
                               fontSize: 11,
                             ),
                           ),
@@ -221,7 +222,7 @@ class _PlayPauseButton extends StatelessWidget {
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
           gradient: LinearGradient(
-            colors: [Color(0xFFE94560), Color(0xFF533483)],
+            colors: [AppColors.primary, AppColors.secondary],
           ),
         ),
         child: isLoading

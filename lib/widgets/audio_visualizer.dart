@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 /// Animated audio visualizer bars that animate when playing.
 /// Creates a faux visualization effect with randomly animated bars.
@@ -14,7 +15,7 @@ class AudioVisualizer extends StatefulWidget {
   const AudioVisualizer({
     super.key,
     required this.isPlaying,
-    this.color = const Color(0xFFE94560),
+    this.color = AppColors.primary,
     this.barCount = 28,
     this.width = 280,
     this.height = 60,
