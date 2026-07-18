@@ -1,12 +1,14 @@
+import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../models/lofi_channel.dart';
 import '../theme/app_colors.dart';
-import 'audio_visualizer.dart';
 
-class ChannelCard extends StatelessWidget {
+/// A bold, retro-themed Channel Card shaped like a mini physical cassette tape.
+/// Its reels spin dynamically when active, creating a unified retro visual system.
+class ChannelCard extends StatefulWidget {
   final LofiChannel channel;
   final bool isCurrentlyPlaying;
   final bool isPlaying;
@@ -21,158 +23,332 @@ class ChannelCard extends StatelessWidget {
   });
 
   @override
+  State<ChannelCard> createState() => _ChannelCardState();
+}
+
+class _ChannelCardState extends State<ChannelCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    );
+
+    if (widget.isPlaying) {
+      _rotationController.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ChannelCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isPlaying && !oldWidget.isPlaying) {
+      _rotationController.repeat();
+    } else if (!widget.isPlaying && oldWidget.isPlaying) {
+      _rotationController.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+      onTap: widget.onTap,
+      child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: isCurrentlyPlaying
-              ? Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.6),
-                  width: 1.5,
-                )
-              : null,
-          boxShadow: isCurrentlyPlaying
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                  ),
-                ]
-              : null,
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: widget.isCurrentlyPlaying
+                ? AppColors.primary
+                : AppColors.secondary.withValues(alpha: 0.3),
+            width: widget.isCurrentlyPlaying ? 1.5 : 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: widget.isCurrentlyPlaying
+                  ? AppColors.primary.withValues(alpha: 0.15)
+                  : Colors.black.withValues(alpha: 0.2),
+              blurRadius: widget.isCurrentlyPlaying ? 16 : 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           child: Stack(
             children: [
-              // Thumbnail
-              AspectRatio(
-                aspectRatio: 16 / 10,
-                child: CachedNetworkImage(
-                  imageUrl: channel.thumbnailUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: AppColors.shimmerBase,
-                    highlightColor: AppColors.shimmerHighlight,
-                    child: Container(color: AppColors.surface),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: AppColors.surface,
-                    child: const Icon(
-                      Icons.music_note,
-                      color: AppColors.inactiveText,
-                      size: 40,
-                    ),
-                  ),
-                ),
-              ),
-
-              // Gradient overlay
+              // 1. Painted Cassette Deck Outlines
               Positioned.fill(
-                child: DecoratedBox(
+                child: CustomPaint(
+                  painter: _CardCassetteBodyPainter(
+                    isCurrentlyPlaying: widget.isCurrentlyPlaying,
+                  ),
+                ),
+              ),
+
+              // 2. Sticker Label (carrying the title)
+              Positioned(
+                left: 10,
+                right: 10,
+                top: 10,
+                child: Container(
+                  height: 32,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.transparent,
-                        AppColors.background.withValues(alpha: 0.7),
-                        AppColors.background.withValues(alpha: 0.95),
-                      ],
-                      stops: const [0.0, 0.3, 0.7, 1.0],
+                    color: AppColors.onSurface.withValues(alpha: 0.95),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: AppColors.secondary.withValues(alpha: 0.2),
+                      width: 0.5,
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    widget.channel.title.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.surface,
+                      fontFamily: 'Outfit',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
                     ),
                   ),
                 ),
               ),
 
-              // LIVE badge
-              if (channel.isLive)
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(6),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.4),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.fiber_manual_record,
-                            color: Colors.white, size: 8),
-                        SizedBox(width: 4),
-                        Text(
-                          'LIVE',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.2,
+              // 3. Clear window cutout revealing the thumbnail inside
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: 12,
+                top: 50,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: CachedNetworkImage(
+                          imageUrl: widget.channel.thumbnailUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Shimmer.fromColors(
+                            baseColor: AppColors.shimmerBase,
+                            highlightColor: AppColors.shimmerHighlight,
+                            child: Container(color: AppColors.surface),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: AppColors.background,
+                            child: const Icon(
+                              Icons.music_note,
+                              color: AppColors.inactiveText,
+                              size: 24,
+                            ),
                           ),
                         ),
+                      ),
+                    ),
+
+                    // Inner glossy glare effect
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppColors.background,
+                            width: 2.0,
+                          ),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Colors.white.withValues(alpha: 0.05),
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.4),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Left spinning spindle reel
+                    Positioned(
+                      left: 12,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: AnimatedBuilder(
+                          animation: _rotationController,
+                          builder: (context, child) {
+                            return _MiniReelWidget(
+                              rotation: _rotationController.value * 2 * pi,
+                              size: 20,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    // Right spinning spindle reel
+                    Positioned(
+                      right: 12,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: AnimatedBuilder(
+                          animation: _rotationController,
+                          builder: (context, child) {
+                            return _MiniReelWidget(
+                              rotation: -_rotationController.value * 2 * pi + 0.5,
+                              size: 20,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 4. Glowing indicator LED (Red for playing, orange for live badge)
+              if (widget.channel.isLive)
+                Positioned(
+                  top: 14,
+                  right: 14,
+                  child: Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: widget.isPlaying ? AppColors.primary : AppColors.secondary,
+                      boxShadow: [
+                        BoxShadow(
+                          color: (widget.isPlaying ? AppColors.primary : AppColors.secondary)
+                              .withValues(alpha: 0.8),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
                       ],
                     ),
                   ),
                 ),
-
-              // Playing indicator
-              if (isCurrentlyPlaying)
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.background.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: isPlaying
-                        ? const PlayingIndicator(size: 14)
-                        : const Icon(Icons.pause,
-                            color: AppColors.primary, size: 14),
-                  ),
-                ),
-
-              // Title overlay at bottom
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Text(
-                  channel.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    height: 1.3,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black54,
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+/// Paints subtle structural lines on the cassette plastic tape shell.
+class _CardCassetteBodyPainter extends CustomPainter {
+  final bool isCurrentlyPlaying;
+
+  _CardCassetteBodyPainter({required this.isCurrentlyPlaying});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+
+    // Horizontal structural ridges
+    final linePaint = Paint()
+      ..color = AppColors.secondary.withValues(alpha: 0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    canvas.drawLine(Offset(0, h * 0.35), Offset(w, h * 0.35), linePaint);
+    canvas.drawLine(Offset(0, h * 0.78), Offset(w, h * 0.78), linePaint);
+
+    // Bottom center plastic trapezoid insert
+    final notchPaint = Paint()
+      ..color = AppColors.background.withValues(alpha: 0.3)
+      ..style = PaintingStyle.fill;
+
+    final path = Path()
+      ..moveTo(w * 0.28, h)
+      ..lineTo(w * 0.34, h * 0.94)
+      ..lineTo(w * 0.66, h * 0.94)
+      ..lineTo(w * 0.72, h)
+      ..close();
+    canvas.drawPath(path, notchPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CardCassetteBodyPainter oldDelegate) {
+    return oldDelegate.isCurrentlyPlaying != isCurrentlyPlaying;
+  }
+}
+
+/// A compact spindle widget placed inside the cassette window.
+class _MiniReelWidget extends StatelessWidget {
+  final double rotation;
+  final double size;
+
+  const _MiniReelWidget({
+    required this.rotation,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: rotation,
+      child: CustomPaint(
+        size: Size(size, size),
+        painter: _MiniReelPainter(),
+      ),
+    );
+  }
+}
+
+/// Paints a small 4-spoke circular gear for the mini cassette cards.
+class _MiniReelPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+
+    // Outer gear spool
+    final outerPaint = Paint()
+      ..color = Colors.black87
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius, outerPaint);
+
+    // 4 spokes representing the spindle gear teeth
+    final spokePaint = Paint()
+      ..color = Colors.white54
+      ..style = PaintingStyle.fill;
+
+    final spokeDist = radius * 0.45;
+    final spokeRadius = radius * 0.15;
+    for (int i = 0; i < 4; i++) {
+      final angle = i * pi / 2;
+      final spokeCenter = Offset(
+        center.dx + spokeDist * cos(angle),
+        center.dy + spokeDist * sin(angle),
+      );
+      canvas.drawCircle(spokeCenter, spokeRadius, spokePaint);
+    }
+
+    // Hub core cutout
+    final hubPaint = Paint()
+      ..color = AppColors.background
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius * 0.2, hubPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
