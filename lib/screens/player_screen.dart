@@ -67,7 +67,7 @@ class PlayerScreen extends StatelessWidget {
                         height: 4,
                         margin: const EdgeInsets.only(top: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: AppColors.onSurface.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -122,7 +122,7 @@ class PlayerScreen extends StatelessWidget {
                                 child: Text(
                                   provider.error!,
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: AppColors.onSurface,
                                     fontSize: 12,
                                     height: 1.3,
                                   ),
@@ -132,7 +132,7 @@ class PlayerScreen extends StatelessWidget {
                               ),
                               IconButton(
                                 icon: const Icon(Icons.refresh_rounded,
-                                    color: Colors.white70, size: 20),
+                                    color: AppColors.onSurface, size: 20),
                                 onPressed: () => provider.playChannel(channel),
                                 tooltip: 'Thử lại',
                               ),
@@ -174,7 +174,7 @@ class PlayerScreen extends StatelessWidget {
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                color: Colors.white70, size: 32),
+                color: AppColors.onSurface, size: 32),
             tooltip: 'Đóng',
           ),
           const Expanded(
@@ -193,7 +193,7 @@ class PlayerScreen extends StatelessWidget {
                 Text(
                   'Lofi Radio',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.onSurface,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -218,7 +218,7 @@ class PlayerScreen extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
+                  color: AppColors.onSurface,
                   fontWeight: FontWeight.w700,
                   height: 1.3,
                 ),
@@ -237,7 +237,7 @@ class PlayerScreen extends StatelessWidget {
           icon: Icons.skip_previous_rounded,
           onTap: provider.previous,
           size: 36,
-          color: Colors.white70,
+          color: AppColors.onSurface,
         ),
         const SizedBox(width: 24),
 
@@ -250,7 +250,7 @@ class PlayerScreen extends StatelessWidget {
           icon: Icons.skip_next_rounded,
           onTap: provider.next,
           size: 36,
-          color: Colors.white70,
+          color: AppColors.onSurface,
         ),
       ],
     );
@@ -285,14 +285,14 @@ class PlayerScreen extends StatelessWidget {
                   padding: EdgeInsets.all(20),
                   child: CircularProgressIndicator(
                     strokeWidth: 3,
-                    color: Colors.white,
+                    color: AppColors.onSurface,
                   ),
                 )
               : Icon(
                   provider.isPlaying
                       ? Icons.pause_rounded
                       : Icons.play_arrow_rounded,
-                  color: Colors.white,
+                  color: AppColors.onSurface,
                   size: 36,
                 ),
         ),
@@ -319,9 +319,9 @@ class PlayerScreen extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.05),
+            color: AppColors.onSurface.withValues(alpha: 0.05),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: AppColors.onSurface.withValues(alpha: 0.1),
               width: 1,
             ),
           ),

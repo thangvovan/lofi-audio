@@ -125,7 +125,7 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             child:
-                const Icon(Icons.headphones_rounded, color: Colors.white, size: 26),
+                const Icon(Icons.headphones_rounded, color: AppColors.onSurface, size: 26),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -136,7 +136,7 @@ class HomeScreen extends StatelessWidget {
                   'LOFI RADIO',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.onSurface,
                         letterSpacing: 1.5,
                         fontFamily: 'Outfit',
                         shadows: [
@@ -258,7 +258,7 @@ class HomeScreen extends StatelessWidget {
             Text(
               'Không thể tải playlist',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
+                    color: AppColors.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
             ),
@@ -277,7 +277,7 @@ class HomeScreen extends StatelessWidget {
               label: const Text('Thử lại'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.onSurface,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -312,11 +312,11 @@ class HomeScreen extends StatelessWidget {
             const Icon(Icons.info_outline_rounded,
                 color: AppColors.secondary, size: 18),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
                 'Chọn một cuộn băng cassette để bắt đầu nghe nhạc lofi.',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: AppColors.onSurface.withValues(alpha: 0.7),
                   fontSize: 12,
                   height: 1.4,
                 ),

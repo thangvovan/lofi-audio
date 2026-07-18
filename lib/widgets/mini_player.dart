@@ -105,7 +105,7 @@ class MiniPlayer extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.onSurface,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -202,7 +202,7 @@ class _ControlButton extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(10), // Enlarge touch zone to 48x48 dp
-          child: Icon(icon, color: Colors.white70, size: size),
+          child: Icon(icon, color: AppColors.onSurface.withValues(alpha: 0.7), size: size),
         ),
       ),
     );
@@ -243,14 +243,14 @@ class _PlayPauseButton extends StatelessWidget {
                     padding: EdgeInsets.all(10),
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: AppColors.onSurface,
                     ),
                   )
                 : Icon(
                     isPlaying
                         ? Icons.pause_rounded
                         : Icons.play_arrow_rounded,
-                    color: Colors.white,
+                    color: AppColors.onSurface,
                     size: 22,
                   ),
           ),

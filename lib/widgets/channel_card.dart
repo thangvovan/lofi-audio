@@ -173,7 +173,7 @@ class _ChannelCardState extends State<ChannelCard>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              Colors.white.withValues(alpha: 0.05),
+                              AppColors.onSurface.withValues(alpha: 0.05),
                               Colors.transparent,
                               Colors.black.withValues(alpha: 0.4),
                             ],
@@ -328,7 +328,7 @@ class _MiniReelPainter extends CustomPainter {
 
     // 4 spokes representing the spindle gear teeth
     final spokePaint = Paint()
-      ..color = Colors.white54
+      ..color = AppColors.onSurface.withValues(alpha: 0.54)
       ..style = PaintingStyle.fill;
 
     final spokeDist = radius * 0.45;
