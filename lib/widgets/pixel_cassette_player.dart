@@ -97,7 +97,7 @@ class _PixelCassettePlayerState extends State<PixelCassettePlayer>
               // Pulse/glow backing for the active state
               BoxShadow(
                 color: widget.isPlaying
-                    ? AppColors.primary.withValues(alpha: 0.15)
+                    ? AppColors.primary.withValues(alpha: 0.08)
                     : Colors.transparent,
                 blurRadius: 30,
                 spreadRadius: 2,

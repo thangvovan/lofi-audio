@@ -132,12 +132,12 @@ class _AudioVisualizerState extends State<AudioVisualizer>
                   boxShadow: widget.isPlaying
                       ? [
                           BoxShadow(
-                            color: widget.color.withValues(alpha: 0.5),
+                            color: widget.color.withValues(alpha: 0.3),
                             blurRadius: 8,
                             spreadRadius: 1,
                           ),
                           BoxShadow(
-                            color: widget.color.withValues(alpha: 0.2),
+                            color: widget.color.withValues(alpha: 0.1),
                             blurRadius: 16,
                             spreadRadius: 2,
                           ),

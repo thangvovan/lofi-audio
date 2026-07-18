@@ -77,7 +77,7 @@ class _ChannelCardState extends State<ChannelCard>
           boxShadow: [
             BoxShadow(
               color: widget.isCurrentlyPlaying
-                  ? AppColors.primary.withValues(alpha: 0.15)
+                  ? AppColors.primary.withValues(alpha: 0.08)
                   : Colors.black.withValues(alpha: 0.2),
               blurRadius: widget.isCurrentlyPlaying ? 16 : 8,
               offset: const Offset(0, 4),
@@ -122,7 +122,7 @@ class _ChannelCardState extends State<ChannelCard>
                       color: AppColors.surface,
                       fontFamily: 'Outfit',
                       fontSize: 10,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: 1.0,
                     ),
                   ),

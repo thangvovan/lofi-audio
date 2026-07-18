@@ -137,13 +137,13 @@ class HomeScreen extends StatelessWidget {
                 Text(
                   'LOFI RADIO',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                         letterSpacing: 1.5,
                         fontFamily: 'Outfit',
                         shadows: [
                           Shadow(
-                            color: AppColors.primary.withValues(alpha: 0.5),
+                            color: AppColors.primary.withValues(alpha: 0.3),
                             blurRadius: 8,
                           ),
                         ],
