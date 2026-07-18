@@ -70,25 +70,23 @@ class HomeScreen extends StatelessWidget {
           // Main content
           SafeArea(
             bottom: false,
-            child: Column(
-              children: [
-                _buildHeader(context),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: Consumer<AudioProvider>(
-                    builder: (context, provider, _) {
-                      if (provider.isLoadingPlaylist) {
-                        return _buildShimmerGrid();
-                      }
-                      if (provider.error != null &&
-                          provider.channels.isEmpty) {
-                        return _buildError(context, provider);
-                      }
-                      return _buildChannelGrid(context, provider);
-                    },
-                  ),
-                ),
-              ],
+            child: Consumer<AudioProvider>(
+              builder: (context, provider, _) {
+                return Column(
+                  children: [
+                    _buildHeader(context),
+                    _buildOnboardingHint(context, provider),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: provider.isLoadingPlaylist
+                          ? _buildShimmerGrid()
+                          : (provider.error != null && provider.channels.isEmpty
+                              ? _buildError(context, provider)
+                              : _buildChannelGrid(context, provider)),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
 
@@ -283,6 +281,51 @@ class HomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOnboardingHint(BuildContext context, AudioProvider provider) {
+    if (provider.hasSeenOnboardingHint || provider.hasCurrentChannel) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.secondary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.secondary.withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.info_outline_rounded,
+                color: AppColors.secondary, size: 18),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Chọn một cuộn băng cassette để bắt đầu nghe nhạc lofi.',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close_rounded,
+                  color: AppColors.inactiveText, size: 16),
+              onPressed: provider.dismissOnboardingHint,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              tooltip: 'Đóng gợi ý',
             ),
           ],
         ),

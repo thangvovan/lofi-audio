@@ -21,6 +21,7 @@ class AudioProvider extends ChangeNotifier {
   StreamSubscription? _skipNextSub;
   StreamSubscription? _skipPrevSub;
   StreamSubscription? _playerStateSub;
+  bool _hasSeenOnboardingHint = false;
 
   // Getters
   List<LofiChannel> get channels => _channels;
@@ -32,6 +33,7 @@ class AudioProvider extends ChangeNotifier {
   AudioPlayer get player => audioHandler.player;
   bool get isPlaying => audioHandler.player.playing;
   bool get hasCurrentChannel => _currentChannel != null;
+  bool get hasSeenOnboardingHint => _hasSeenOnboardingHint;
 
   AudioProvider({
     required this.audioHandler,
@@ -69,6 +71,7 @@ class AudioProvider extends ChangeNotifier {
     _currentChannel = channel;
     _currentIndex = _channels.indexOf(channel);
     _error = null;
+    _hasSeenOnboardingHint = true; // Auto-dismiss hint on first play
     notifyListeners();
 
     try {
@@ -114,6 +117,11 @@ class AudioProvider extends ChangeNotifier {
     await audioHandler.stop();
     _currentChannel = null;
     _currentIndex = -1;
+    notifyListeners();
+  }
+
+  void dismissOnboardingHint() {
+    _hasSeenOnboardingHint = true;
     notifyListeners();
   }
 
