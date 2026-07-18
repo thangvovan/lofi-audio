@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../providers/audio_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/audio_visualizer.dart';
+import '../widgets/pixel_cassette_player.dart';
 
 class PlayerScreen extends StatelessWidget {
   const PlayerScreen({super.key});
@@ -57,8 +58,21 @@ class PlayerScreen extends StatelessWidget {
                     _buildAppBar(context),
                     const Spacer(flex: 1),
 
-                    // Album art
-                    _buildAlbumArt(context, channel, provider),
+                    // Album art (Animated Pixel Cassette Player)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Hero(
+                        tag: 'player_thumbnail',
+                        child: Material(
+                          color: Colors.transparent,
+                          child: PixelCassettePlayer(
+                            isPlaying: provider.isPlaying,
+                            isLoading: provider.isLoadingStream,
+                            title: channel.title,
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 32),
 
                     // Title
@@ -124,109 +138,6 @@ class PlayerScreen extends StatelessWidget {
           ),
           const SizedBox(width: 48), // Balance with back button
         ],
-      ),
-    );
-  }
-
-  Widget _buildAlbumArt(
-      BuildContext context, dynamic channel, AudioProvider provider) {
-    final size = MediaQuery.of(context).size.width * 0.7;
-
-    return Center(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.2),
-              blurRadius: 40,
-              offset: const Offset(0, 12),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.5),
-              blurRadius: 30,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Hero(
-              tag: 'player_thumbnail',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: CachedNetworkImage(
-                  imageUrl: channel.maxThumbnailUrl,
-                  width: size,
-                  height: size,
-                  fit: BoxFit.cover,
-                  errorWidget: (context, url, error) => Container(
-                    color: AppColors.surface,
-                    child: const Icon(Icons.music_note,
-                        color: AppColors.inactiveText, size: 80),
-                  ),
-                ),
-              ),
-            ),
-
-            // Live badge
-            if (channel.isLive)
-              Positioned(
-                top: 16,
-                right: 16,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.5),
-                        blurRadius: 12,
-                      ),
-                    ],
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.fiber_manual_record,
-                          color: Colors.white, size: 10),
-                      SizedBox(width: 6),
-                      Text(
-                        'LIVE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-            // Loading overlay
-            if (provider.isLoadingStream)
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Container(
-                    color: Colors.black45,
-                    child: const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primary,
-                        strokeWidth: 3,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }
