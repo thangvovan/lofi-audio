@@ -132,9 +132,14 @@ class _AudioVisualizerState extends State<AudioVisualizer>
                   boxShadow: widget.isPlaying
                       ? [
                           BoxShadow(
-                            color: widget.color.withValues(alpha: 0.3),
-                            blurRadius: 4,
-                            spreadRadius: 0,
+                            color: widget.color.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                            spreadRadius: 1,
+                          ),
+                          BoxShadow(
+                            color: widget.color.withValues(alpha: 0.2),
+                            blurRadius: 16,
+                            spreadRadius: 2,
                           ),
                         ]
                       : null,
@@ -155,7 +160,7 @@ class PlayingIndicator extends StatefulWidget {
 
   const PlayingIndicator({
     super.key,
-    this.color = const Color(0xFFE94560),
+    this.color = AppColors.primary,
     this.size = 16,
   });
 

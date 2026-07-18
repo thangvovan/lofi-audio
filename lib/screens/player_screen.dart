@@ -23,9 +23,15 @@ class PlayerScreen extends StatelessWidget {
         }
 
         return Scaffold(
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
+          body: GestureDetector(
+            onVerticalDragEnd: (details) {
+              if (details.primaryVelocity! > 300) { // Swift swipe down pops screen
+                Navigator.of(context).pop();
+              }
+            },
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
               // Blurred background thumbnail
               CachedNetworkImage(
                 imageUrl: channel.maxThumbnailUrl,
@@ -54,6 +60,20 @@ class PlayerScreen extends StatelessWidget {
               SafeArea(
                 child: Column(
                   children: [
+                    // Top drag handle indicator
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        margin: const EdgeInsets.only(top: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
                     // App bar
                     _buildAppBar(context),
                     const Spacer(flex: 1),
@@ -97,7 +117,8 @@ class PlayerScreen extends StatelessWidget {
               ),
             ],
           ),
-        );
+        ),
+      );
       },
     );
   }
@@ -111,6 +132,7 @@ class PlayerScreen extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.keyboard_arrow_down_rounded,
                 color: Colors.white70, size: 32),
+            tooltip: 'Đóng',
           ),
           const Expanded(
             child: Column(
@@ -201,41 +223,45 @@ class PlayerScreen extends StatelessWidget {
   }
 
   Widget _buildPlayPauseButton(AudioProvider provider) {
-    return GestureDetector(
-      onTap: provider.isLoadingStream ? null : provider.togglePlayPause,
-      child: Container(
-        width: 72,
-        height: 72,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primary, Color(0xFFBF3250)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.4),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
+    return Semantics(
+      label: provider.isPlaying ? 'Tạm dừng' : 'Phát nhạc',
+      button: true,
+      child: _BounceScaleWidget(
+        onTap: provider.isLoadingStream ? () {} : provider.togglePlayPause,
+        child: Container(
+          width: 72,
+          height: 72,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.primary, Color(0xFFBF3250)],
             ),
-          ],
-        ),
-        child: provider.isLoadingStream
-            ? const Padding(
-                padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: Colors.white,
-                ),
-              )
-            : Icon(
-                provider.isPlaying
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded,
-                color: Colors.white,
-                size: 36,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.4),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
               ),
+            ],
+          ),
+          child: provider.isLoadingStream
+              ? const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.white,
+                  ),
+                )
+              : Icon(
+                  provider.isPlaying
+                      ? Icons.pause_rounded
+                      : Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 36,
+                ),
+        ),
       ),
     );
   }
@@ -246,19 +272,85 @@ class PlayerScreen extends StatelessWidget {
     required double size,
     required Color color,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.05),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
-            width: 1,
+    final String label = icon == Icons.skip_previous_rounded
+        ? 'Kênh trước'
+        : 'Kênh tiếp theo';
+
+    return Semantics(
+      label: label,
+      button: true,
+      child: _BounceScaleWidget(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.05),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.1),
+              width: 1,
+            ),
           ),
+          child: Icon(icon, color: color, size: size),
         ),
-        child: Icon(icon, color: color, size: size),
+      ),
+    );
+  }
+}
+
+/// A tactile button widget that scales down slightly on press.
+class _BounceScaleWidget extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _BounceScaleWidget({
+    required this.child,
+    required this.onTap,
+  });
+
+  @override
+  State<_BounceScaleWidget> createState() => _BounceScaleWidgetState();
+}
+
+class _BounceScaleWidgetState extends State<_BounceScaleWidget>
+    with SingleTickerProviderStateMixin {
+  late double _scale;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      lowerBound: 0.0,
+      upperBound: 0.1,
+    )..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _scale = 1 - _controller.value;
+
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _controller.reverse(),
+      behavior: HitTestBehavior.opaque,
+      child: Transform.scale(
+        scale: _scale,
+        child: widget.child,
       ),
     );
   }

@@ -191,11 +191,19 @@ class _ControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Icon(icon, color: Colors.white70, size: size),
+    final String semanticLabel = icon == Icons.skip_previous_rounded
+        ? 'Bài trước'
+        : 'Bài tiếp theo';
+
+    return Semantics(
+      label: semanticLabel,
+      button: true,
+      child: BounceScaleWidget(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10), // Enlarge touch zone to 48x48 dp
+          child: Icon(icon, color: Colors.white70, size: size),
+        ),
       ),
     );
   }
@@ -214,32 +222,98 @@ class _PlayPauseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: isLoading ? null : onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            colors: [AppColors.primary, AppColors.secondary],
+    return Semantics(
+      label: isPlaying ? 'Tạm dừng' : 'Phát nhạc',
+      button: true,
+      child: BounceScaleWidget(
+        onTap: isLoading ? () {} : onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(6), // Enlarge touch zone from 36 to 48 dp
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.secondary],
+              ),
+            ),
+            child: isLoading
+                ? const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(
+                    isPlaying
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
           ),
         ),
-        child: isLoading
-            ? const Padding(
-                padding: EdgeInsets.all(10),
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : Icon(
-                isPlaying
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
+      ),
+    );
+  }
+}
+
+/// A tactile button widget that scales down slightly on press.
+class BounceScaleWidget extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const BounceScaleWidget({
+    super.key,
+    required this.child,
+    required this.onTap,
+  });
+
+  @override
+  State<BounceScaleWidget> createState() => _BounceScaleWidgetState();
+}
+
+class _BounceScaleWidgetState extends State<BounceScaleWidget>
+    with SingleTickerProviderStateMixin {
+  late double _scale;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      lowerBound: 0.0,
+      upperBound: 0.1,
+    )..addListener(() {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _scale = 1 - _controller.value;
+
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _controller.reverse(),
+      behavior: HitTestBehavior.opaque,
+      child: Transform.scale(
+        scale: _scale,
+        child: widget.child,
       ),
     );
   }

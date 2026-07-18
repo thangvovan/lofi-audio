@@ -193,8 +193,8 @@ class _PixelCassettePlayerState extends State<PixelCassettePlayer>
                     }
 
                     return Container(
-                      width: width * 0.024,
-                      height: width * 0.024,
+                      width: width * 0.035,
+                      height: width * 0.035,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: ledColor.withValues(alpha: opacity),
@@ -202,8 +202,8 @@ class _PixelCassettePlayerState extends State<PixelCassettePlayer>
                           if (widget.isPlaying || widget.isLoading)
                             BoxShadow(
                               color: ledColor.withValues(alpha: 0.6),
-                              blurRadius: 6,
-                              spreadRadius: 1,
+                              blurRadius: 10,
+                              spreadRadius: 2,
                             ),
                         ],
                       ),
