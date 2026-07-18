@@ -190,17 +190,20 @@ class HomeScreen extends StatelessWidget {
           final channel = provider.channels[index];
           final isCurrentlyPlaying = provider.currentChannel == channel;
 
-          return ChannelCard(
-            channel: channel,
-            isCurrentlyPlaying: isCurrentlyPlaying,
-            isPlaying: isCurrentlyPlaying && provider.isPlaying,
-            onTap: () {
-              if (isCurrentlyPlaying) {
-                provider.togglePlayPause();
-              } else {
-                provider.playChannel(channel);
-              }
-            },
+           return _FadeSlideEntrance(
+            index: index,
+            child: ChannelCard(
+              channel: channel,
+              isCurrentlyPlaying: isCurrentlyPlaying,
+              isPlaying: isCurrentlyPlaying && provider.isPlaying,
+              onTap: () {
+                if (isCurrentlyPlaying) {
+                  provider.togglePlayPause();
+                } else {
+                  provider.playChannel(channel);
+                }
+              },
+            ),
           );
         },
       ),
@@ -330,6 +333,90 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Staggered fade and slide-up entrance animation for grid items.
+/// Bypasses animation if prefers-reduced-motion is requested.
+class _FadeSlideEntrance extends StatefulWidget {
+  final Widget child;
+  final int index;
+
+  const _FadeSlideEntrance({
+    required this.child,
+    required this.index,
+  });
+
+  @override
+  State<_FadeSlideEntrance> createState() => _FadeSlideEntranceState();
+}
+
+class _FadeSlideEntranceState extends State<_FadeSlideEntrance>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 0.12),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    // Stagger entry delay based on item index (capped at 10 items to prevent lag)
+    final staggerIndex = widget.index.clamp(0, 10);
+    final delay = Duration(milliseconds: staggerIndex * 40);
+    Future.delayed(delay, () {
+      if (mounted) {
+        _controller.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Respect OS-level reduced motion preferences
+    if (MediaQuery.of(context).disableAnimations) {
+      return widget.child;
+    }
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _opacityAnimation.value,
+          child: FractionalTranslation(
+            translation: _slideAnimation.value,
+            child: widget.child,
+          ),
+        );
+      },
     );
   }
 }
