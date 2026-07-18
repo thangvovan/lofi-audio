@@ -9,12 +9,14 @@ class PixelCassettePlayer extends StatefulWidget {
   final bool isPlaying;
   final bool isLoading;
   final String title;
+  final VoidCallback? onTap;
 
   const PixelCassettePlayer({
     super.key,
     required this.isPlaying,
     required this.isLoading,
     required this.title,
+    this.onTap,
   });
 
   @override
@@ -26,6 +28,7 @@ class _PixelCassettePlayerState extends State<PixelCassettePlayer>
   late AnimationController _reelController;
   late AnimationController _ledController;
   late Animation<double> _ledGlowAnimation;
+  double _scale = 1.0;
 
   @override
   void initState() {
@@ -83,30 +86,53 @@ class _PixelCassettePlayerState extends State<PixelCassettePlayer>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth > 0 ? constraints.maxWidth : 300.0;
-        final height = width * 0.62; // Cassette aspect ratio ~ 1.6:1
+    return GestureDetector(
+      onTapDown: (_) {
+        setState(() {
+          _scale = 0.94;
+        });
+      },
+      onTapUp: (_) {
+        setState(() {
+          _scale = 1.0;
+        });
+        if (widget.onTap != null) {
+          widget.onTap!();
+        }
+      },
+      onTapCancel: () {
+        setState(() {
+          _scale = 1.0;
+        });
+      },
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth > 0 ? constraints.maxWidth : 300.0;
+            final height = width * 0.62; // Cassette aspect ratio ~ 1.6:1
 
-        return Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              // Pulse/glow backing for the active state
-              BoxShadow(
-                color: widget.isPlaying
-                    ? AppColors.primary.withValues(alpha: 0.08)
-                    : Colors.transparent,
-                blurRadius: 30,
-                spreadRadius: 2,
+            return Container(
+              width: width,
+              height: height,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  // Pulse/glow backing for the active state
+                  BoxShadow(
+                    color: widget.isPlaying
+                        ? AppColors.primary.withValues(alpha: 0.08)
+                        : Colors.transparent,
+                    blurRadius: 30,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
               // 1. Painted Cassette Deck Chassis
               Positioned.fill(
                 child: CustomPaint(
@@ -215,7 +241,9 @@ class _PixelCassettePlayerState extends State<PixelCassettePlayer>
           ),
         );
       },
-    );
+    ),
+  ),
+);
   }
 }
 

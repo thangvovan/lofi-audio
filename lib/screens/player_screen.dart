@@ -89,6 +89,7 @@ class PlayerScreen extends StatelessWidget {
                             isPlaying: provider.isPlaying,
                             isLoading: provider.isLoadingStream,
                             title: channel.title,
+                            onTap: provider.togglePlayPause,
                           ),
                         ),
                       ),
