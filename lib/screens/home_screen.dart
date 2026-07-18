@@ -115,12 +115,12 @@ class HomeScreen extends StatelessWidget {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFFE94560), Color(0xFF533483)],
+                colors: [AppColors.primary, AppColors.secondary],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFE94560).withValues(alpha: 0.3),
+                  color: AppColors.primary.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -135,18 +135,25 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Lofi Radio',
+                  'LOFI RADIO',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                         color: Colors.white,
-                        letterSpacing: 0.5,
+                        letterSpacing: 1.5,
+                        fontFamily: 'Outfit',
+                        shadows: [
+                          Shadow(
+                            color: AppColors.primary.withValues(alpha: 0.5),
+                            blurRadius: 8,
+                          ),
+                        ],
                       ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Chill beats to relax & study',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF8D8DAA),
+                        color: AppColors.inactiveText,
                         letterSpacing: 0.3,
                       ),
                 ),
@@ -165,11 +172,11 @@ class HomeScreen extends StatelessWidget {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Color(0xFF8D8DAA),
+                          color: AppColors.inactiveText,
                         ),
                       )
                     : const Icon(Icons.refresh_rounded,
-                        color: Color(0xFF8D8DAA)),
+                        color: AppColors.inactiveText),
                 tooltip: 'Tải lại',
               );
             },
@@ -180,40 +187,46 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildChannelGrid(BuildContext context, AudioProvider provider) {
-    return GridView.builder(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        8,
-        16,
-        // Extra padding for mini player
-        provider.hasCurrentChannel
-            ? MediaQuery.of(context).padding.bottom + 90
-            : MediaQuery.of(context).padding.bottom + 16,
-      ),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 16 / 13,
-      ),
-      itemCount: provider.channels.length,
-      itemBuilder: (context, index) {
-        final channel = provider.channels[index];
-        final isCurrentlyPlaying = provider.currentChannel == channel;
+    return RefreshIndicator(
+      color: AppColors.primary,
+      backgroundColor: AppColors.surface,
+      onRefresh: provider.loadPlaylist,
+      child: GridView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          // Extra padding for mini player
+          provider.hasCurrentChannel
+              ? MediaQuery.of(context).padding.bottom + 90
+              : MediaQuery.of(context).padding.bottom + 16,
+        ),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 16 / 13,
+        ),
+        itemCount: provider.channels.length,
+        itemBuilder: (context, index) {
+          final channel = provider.channels[index];
+          final isCurrentlyPlaying = provider.currentChannel == channel;
 
-        return ChannelCard(
-          channel: channel,
-          isCurrentlyPlaying: isCurrentlyPlaying,
-          isPlaying: isCurrentlyPlaying && provider.isPlaying,
-          onTap: () {
-            if (isCurrentlyPlaying) {
-              provider.togglePlayPause();
-            } else {
-              provider.playChannel(channel);
-            }
-          },
-        );
-      },
+          return ChannelCard(
+            channel: channel,
+            isCurrentlyPlaying: isCurrentlyPlaying,
+            isPlaying: isCurrentlyPlaying && provider.isPlaying,
+            onTap: () {
+              if (isCurrentlyPlaying) {
+                provider.togglePlayPause();
+              } else {
+                provider.playChannel(channel);
+              }
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -229,11 +242,11 @@ class HomeScreen extends StatelessWidget {
       itemCount: 6,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
-          baseColor: const Color(0xFF1A1A2E),
-          highlightColor: const Color(0xFF2A2A4E),
+          baseColor: AppColors.surface,
+          highlightColor: AppColors.shimmerHighlight,
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
             ),
           ),
