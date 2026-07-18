@@ -8,30 +8,35 @@ import '../providers/audio_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/audio_visualizer.dart';
 import '../widgets/pixel_cassette_player.dart';
+import '../widgets/space_nebula_bg.dart';
 
 class PlayerScreen extends StatelessWidget {
   const PlayerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AudioProvider>(
-      builder: (context, provider, _) {
-        final channel = provider.currentChannel;
-        if (channel == null) {
-          Navigator.of(context).pop();
-          return const SizedBox.shrink();
-        }
+    final provider = Provider.of<AudioProvider>(context);
+    final channel = provider.currentChannel;
 
-        return Scaffold(
-          body: GestureDetector(
-            onVerticalDragEnd: (details) {
-              if (details.primaryVelocity! > 300) { // Swift swipe down pops screen
-                Navigator.of(context).pop();
-              }
-            },
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
+    if (channel == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Dismissible(
+      key: const Key('player_dismiss'),
+      direction: DismissDirection.down,
+      onDismissed: (_) => Navigator.of(context).pop(),
+      child: Scaffold(
+        body: PopScope(
+          canPop: true,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) {
+              // Reset status bar brightness when popping player screen
+            }
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
               // Blurred background thumbnail
               CachedNetworkImage(
                 imageUrl: channel.maxThumbnailUrl,
@@ -55,6 +60,9 @@ class PlayerScreen extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // Particle background overlay
+              SpaceNebulaBg(isPlaying: provider.isPlaying),
 
               // Content
               SafeArea(
@@ -162,8 +170,7 @@ class PlayerScreen extends StatelessWidget {
             ],
           ),
         ),
-      );
-      },
+      ),
     );
   }
 

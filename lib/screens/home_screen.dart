@@ -6,6 +6,7 @@ import '../providers/audio_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/channel_card.dart';
 import '../widgets/mini_player.dart';
+import '../widgets/space_nebula_bg.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -64,6 +65,15 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ),
+
+          // Particle background overlay
+          Positioned.fill(
+            child: Consumer<AudioProvider>(
+              builder: (context, provider, _) {
+                return SpaceNebulaBg(isPlaying: provider.isPlaying);
+              },
             ),
           ),
 
