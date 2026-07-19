@@ -16,14 +16,14 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Background gradient
+          // Background gradient — static, never needs rebuilding
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF16213E), // Keeping this gradient base for rich atmosphere, or we can use AppColors.tertiary
+                  Color(0xFF16213E),
                   AppColors.background,
                   AppColors.background,
                 ],
@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Decorative circles
+          // Decorative circles — static
           Positioned(
             top: -60,
             right: -40,
@@ -68,44 +68,62 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Particle background overlay
+          // Particle background — Selector only on isPlaying to avoid rebuilds
           Positioned.fill(
-            child: Consumer<AudioProvider>(
-              builder: (context, provider, _) {
-                return SpaceNebulaBg(isPlaying: provider.isPlaying);
+            child: Selector<AudioProvider, bool>(
+              selector: (_, p) => p.isPlaying,
+              builder: (context, isPlaying, child) {
+                return SpaceNebulaBg(isPlaying: isPlaying);
               },
             ),
           ),
 
-          // Main content
+          // Main content — Selector on the fields the column actually uses
           SafeArea(
             bottom: false,
-            child: Consumer<AudioProvider>(
-              builder: (context, provider, _) {
-                return Column(
-                  children: [
-                    _buildHeader(context),
-                    _buildOnboardingHint(context, provider),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: provider.isLoadingPlaylist
-                          ? _buildShimmerGrid(context)
-                          : (provider.error != null && provider.channels.isEmpty
-                              ? _buildError(context, provider)
-                              : _buildChannelGrid(context, provider)),
+            child: Column(
+              children: [
+                // Header is fully static — no Consumer needed
+                _buildHeader(context),
+                Selector<AudioProvider, ({bool hasSeenHint, bool hasChannel})>(
+                  selector: (_, p) => (
+                    hasSeenHint: p.hasSeenOnboardingHint,
+                    hasChannel: p.hasCurrentChannel,
+                  ),
+                  builder: (ctx, state, child) {
+                    // Pass a thin proxy so _buildOnboardingHint can call provider
+                    final provider = context.read<AudioProvider>();
+                    return _buildOnboardingHint(context, provider);
+                  },
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: Selector<AudioProvider, ({bool loading, String? error, int channelCount})>(
+                    selector: (_, p) => (
+                      loading: p.isLoadingPlaylist,
+                      error: p.error,
+                      channelCount: p.channels.length,
                     ),
-                  ],
-                );
-              },
+                    builder: (ctx, state, child) {
+                      final provider = context.read<AudioProvider>();
+                      if (state.loading) return _buildShimmerGrid(context);
+                      if (state.error != null && state.channelCount == 0) {
+                        return _buildError(context, provider);
+                      }
+                      return _buildChannelGrid(context, provider);
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
 
           // Mini player overlay
-          Positioned(
+          const Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: const MiniPlayer(),
+            child: MiniPlayer(),
           ),
         ],
       ),
@@ -208,19 +226,23 @@ class HomeScreen extends StatelessWidget {
           final channel = provider.channels[index];
           final isCurrentlyPlaying = provider.currentChannel == channel;
 
-           return _FadeSlideEntrance(
-            index: index,
-            child: ChannelCard(
-              channel: channel,
-              isCurrentlyPlaying: isCurrentlyPlaying,
-              isPlaying: isCurrentlyPlaying && provider.isPlaying,
-              onTap: () {
-                if (isCurrentlyPlaying) {
-                  provider.togglePlayPause();
-                } else {
-                  provider.playChannel(channel);
-                }
-              },
+          // RepaintBoundary per card: each card's spinning reel animation
+          // won't dirty its grid siblings
+          return RepaintBoundary(
+            child: _FadeSlideEntrance(
+              index: index,
+              child: ChannelCard(
+                channel: channel,
+                isCurrentlyPlaying: isCurrentlyPlaying,
+                isPlaying: isCurrentlyPlaying && provider.isPlaying,
+                onTap: () {
+                  if (isCurrentlyPlaying) {
+                    provider.togglePlayPause();
+                  } else {
+                    provider.playChannel(channel);
+                  }
+                },
+              ),
             ),
           );
         },

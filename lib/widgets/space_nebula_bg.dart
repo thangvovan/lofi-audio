@@ -86,29 +86,33 @@ class _SpaceNebulaBgState extends State<SpaceNebulaBg>
 
         if (disableAnimations) {
           // Render static particle field without animation loop
-          return CustomPaint(
-            size: size,
-            painter: _ParticleFieldPainter(
-              particles: _particles,
-              isPlaying: false,
-              animationValue: 0.0,
+          return RepaintBoundary(
+            child: CustomPaint(
+              size: size,
+              painter: _ParticleFieldPainter(
+                particles: _particles,
+                isPlaying: false,
+                animationValue: 0.0,
+              ),
             ),
           );
         }
 
-        return AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            _updateParticles(size);
-            return CustomPaint(
-              size: size,
-              painter: _ParticleFieldPainter(
-                particles: _particles,
-                isPlaying: widget.isPlaying,
-                animationValue: _controller.value,
-              ),
-            );
-          },
+        return RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              _updateParticles(size);
+              return CustomPaint(
+                size: size,
+                painter: _ParticleFieldPainter(
+                  particles: _particles,
+                  isPlaying: widget.isPlaying,
+                  animationValue: _controller.value,
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -164,6 +168,12 @@ class _ParticleFieldPainter extends CustomPainter {
   final bool isPlaying;
   final double animationValue;
 
+  // Reusable Paint instances — created once, not per-frame
+  final Paint _fillPaint = Paint()..style = PaintingStyle.fill;
+  final Paint _glowPaint = Paint()
+    ..style = PaintingStyle.fill
+    ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
+
   _ParticleFieldPainter({
     required this.particles,
     required this.isPlaying,
@@ -177,24 +187,28 @@ class _ParticleFieldPainter extends CustomPainter {
       final double breath = isPlaying ? sin(p.pulsePhase) * 0.35 + 0.65 : 0.7;
       final double finalOpacity = (p.opacity * breath).clamp(0.05, 0.9);
 
-      final paint = Paint()
-        ..color = p.color.withValues(alpha: finalOpacity)
-        ..style = PaintingStyle.fill;
+      _fillPaint.color = p.color.withValues(alpha: finalOpacity);
 
-      // Draw a soft glowing halo for active states
+      // Draw a soft glowing halo for active states (only large particles)
       if (isPlaying && p.size > 2.5) {
-        final glowPaint = Paint()
-          ..color = p.color.withValues(alpha: finalOpacity * 0.2)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
-        canvas.drawCircle(Offset(p.x, p.y), p.size * 2.2, glowPaint);
+        _glowPaint.color = p.color.withValues(alpha: finalOpacity * 0.2);
+        canvas.drawCircle(Offset(p.x, p.y), p.size * 2.2, _glowPaint);
       }
 
-      canvas.drawCircle(Offset(p.x, p.y), p.size * (isPlaying ? breath * 1.1 : 1.0), paint);
+      canvas.drawCircle(
+        Offset(p.x, p.y),
+        p.size * (isPlaying ? breath * 1.1 : 1.0),
+        _fillPaint,
+      );
     }
   }
 
   @override
   bool shouldRepaint(covariant _ParticleFieldPainter oldDelegate) {
-    return true; // Continuously animated
+    // When playing: always repaint (particles are moving)
+    // When paused: only repaint if isPlaying state changed (not every frame)
+    if (oldDelegate.isPlaying != isPlaying) return true;
+    if (!isPlaying) return false; // Paused — no movement needed
+    return true;
   }
 }

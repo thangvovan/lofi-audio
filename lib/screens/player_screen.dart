@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../providers/audio_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/audio_visualizer.dart';
+import '../widgets/mini_player.dart' show BounceScaleWidget;
 import '../widgets/pixel_cassette_player.dart';
 import '../widgets/space_nebula_bg.dart';
 
@@ -15,88 +16,93 @@ class PlayerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AudioProvider>(context);
-    final channel = provider.currentChannel;
+    return Consumer<AudioProvider>(
+      builder: (context, provider, _) {
+        final channel = provider.currentChannel;
 
-    if (channel == null) {
-      return const SizedBox.shrink();
-    }
+        if (channel == null) {
+          return const SizedBox.shrink();
+        }
 
-    return Dismissible(
-      key: const Key('player_dismiss'),
-      direction: DismissDirection.down,
-      onDismissed: (_) => Navigator.of(context).pop(),
-      child: Scaffold(
-        body: PopScope(
-          canPop: true,
-          onPopInvokedWithResult: (didPop, result) {
-            if (didPop) {
-              // Reset status bar brightness when popping player screen
-            }
-          },
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Blurred background thumbnail
-              CachedNetworkImage(
-                imageUrl: channel.maxThumbnailUrl,
-                fit: BoxFit.cover,
-                errorWidget: (context, url, error) =>
-                    Container(color: AppColors.background),
-              ),
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.background.withValues(alpha: 0.6),
-                        AppColors.background.withValues(alpha: 0.85),
-                        AppColors.background.withValues(alpha: 0.95),
-                      ],
-                    ),
+        return Dismissible(
+          key: const Key('player_dismiss'),
+          direction: DismissDirection.down,
+          onDismissed: (_) => Navigator.of(context).pop(),
+          child: Scaffold(
+            body: PopScope(
+              canPop: true,
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) {
+                  // Reset status bar brightness when popping player screen
+                }
+              },
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Blurred background thumbnail
+                  CachedNetworkImage(
+                    imageUrl: channel.maxThumbnailUrl,
+                    fit: BoxFit.cover,
+                    errorWidget: (context, url, error) =>
+                        Container(color: AppColors.background),
                   ),
-                ),
-              ),
-
-              // Particle background overlay
-              SpaceNebulaBg(isPlaying: provider.isPlaying),
-
-              // Content
-              SafeArea(
-                child: Column(
-                  children: [
-                    // Top drag handle indicator
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        margin: const EdgeInsets.only(top: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.onSurface.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(2),
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppColors.background.withValues(alpha: 0.6),
+                            AppColors.background.withValues(alpha: 0.85),
+                            AppColors.background.withValues(alpha: 0.95),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: OrientationBuilder(
-                        builder: (context, orientation) {
-                          return orientation == Orientation.landscape
-                              ? _buildLandscapeLayout(context, channel, provider)
-                              : _buildPortraitLayout(context, channel, provider);
-                        },
-                      ),
+                  ),
+
+                  // Particle background overlay — isolated repaint layer
+                  RepaintBoundary(
+                    child: SpaceNebulaBg(isPlaying: provider.isPlaying),
+                  ),
+
+                  // Content
+                  SafeArea(
+                    child: Column(
+                      children: [
+                        // Top drag handle indicator
+                        Center(
+                          child: Container(
+                            width: 36,
+                            height: 4,
+                            margin: const EdgeInsets.only(top: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.onSurface.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: OrientationBuilder(
+                            builder: (context, orientation) {
+                              return orientation == Orientation.landscape
+                                  ? _buildLandscapeLayout(context, channel, provider)
+                                  : _buildPortraitLayout(context, channel, provider);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -106,18 +112,20 @@ class PlayerScreen extends StatelessWidget {
         _buildAppBar(context),
         const Spacer(flex: 1),
 
-        // Album art (Animated Pixel Cassette Player)
+        // Album art (Animated Pixel Cassette Player) — isolated repaint layer
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Hero(
             tag: 'player_thumbnail',
             child: Material(
               color: Colors.transparent,
-              child: PixelCassettePlayer(
-                isPlaying: provider.isPlaying,
-                isLoading: provider.isLoadingStream,
-                title: channel.title,
-                onTap: provider.togglePlayPause,
+              child: RepaintBoundary(
+                child: PixelCassettePlayer(
+                  isPlaying: provider.isPlaying,
+                  isLoading: provider.isLoadingStream,
+                  title: channel.title,
+                  onTap: provider.togglePlayPause,
+                ),
               ),
             ),
           ),
@@ -353,7 +361,7 @@ class PlayerScreen extends StatelessWidget {
     return Semantics(
       label: provider.isPlaying ? 'Tạm dừng' : 'Phát nhạc',
       button: true,
-      child: _BounceScaleWidget(
+      child: BounceScaleWidget(
         onTap: provider.isLoadingStream ? () {} : provider.togglePlayPause,
         child: Container(
           width: 72,
@@ -406,7 +414,7 @@ class PlayerScreen extends StatelessWidget {
     return Semantics(
       label: label,
       button: true,
-      child: _BounceScaleWidget(
+      child: BounceScaleWidget(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(12),
@@ -425,60 +433,4 @@ class PlayerScreen extends StatelessWidget {
   }
 }
 
-/// A tactile button widget that scales down slightly on press.
-class _BounceScaleWidget extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onTap;
-
-  const _BounceScaleWidget({
-    required this.child,
-    required this.onTap,
-  });
-
-  @override
-  State<_BounceScaleWidget> createState() => _BounceScaleWidgetState();
-}
-
-class _BounceScaleWidgetState extends State<_BounceScaleWidget>
-    with SingleTickerProviderStateMixin {
-  late double _scale;
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-      lowerBound: 0.0,
-      upperBound: 0.1,
-    )..addListener(() {
-        setState(() {});
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _scale = 1 - _controller.value;
-
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _controller.reverse(),
-      behavior: HitTestBehavior.opaque,
-      child: Transform.scale(
-        scale: _scale,
-        child: widget.child,
-      ),
-    );
-  }
-}
+// BounceScaleWidget is defined in mini_player.dart and imported via show clause above.

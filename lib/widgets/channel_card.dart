@@ -143,6 +143,9 @@ class _ChannelCardState extends State<ChannelCard>
                         child: CachedNetworkImage(
                           imageUrl: widget.channel.thumbnailUrl,
                           fit: BoxFit.cover,
+                          // Limit in-memory decode size; cards are ~170px wide at
+                          // 2-column layout, 320 covers 2x HiDPI without waste
+                          memCacheWidth: 320,
                           placeholder: (context, url) => Shimmer.fromColors(
                             baseColor: AppColors.shimmerBase,
                             highlightColor: AppColors.shimmerHighlight,
