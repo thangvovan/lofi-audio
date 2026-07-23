@@ -151,8 +151,8 @@ class MiniPlayer extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _ControlButton(
-                      icon: Icons.skip_previous_rounded,
-                      onTap: provider.previous,
+                      icon: Icons.volume_down_rounded,
+                      onTap: provider.volumeDown,
                       size: 28,
                     ),
                     const SizedBox(width: 4),
@@ -163,8 +163,8 @@ class MiniPlayer extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     _ControlButton(
-                      icon: Icons.skip_next_rounded,
-                      onTap: provider.next,
+                      icon: Icons.volume_up_rounded,
+                      onTap: provider.volumeUp,
                       size: 28,
                     ),
                   ],
@@ -191,9 +191,9 @@ class _ControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String semanticLabel = icon == Icons.skip_previous_rounded
-        ? 'Kênh trước'
-        : 'Kênh tiếp theo';
+    final String semanticLabel = icon == Icons.volume_down_rounded
+        ? 'Giảm âm lượng'
+        : 'Tăng âm lượng';
 
     return Semantics(
       label: semanticLabel,
