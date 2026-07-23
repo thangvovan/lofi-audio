@@ -1,16 +1,33 @@
-# lofi
+# Lofi Radio - Flutter Music Player
 
-A new Flutter project.
+Lofi Radio is a modern, aesthetic Flutter music player for Lofi radio streaming. It features playlists of streaming radio from the official Lofi Girl Youtube Channel with a beautiful dark theme and a smooth audio player.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Music Streaming**: Stream high-quality music directly from the official Lofi Girl Youtube Channel.
+- **Audio Playback**: Seamless audio player with handful of essential controls.
+- **Persistent Player**: The player continues to play music even when navigating through the app.
+- **Sleek UI**: Modern, dark-themed interface with smooth animations and glassmorphism effects.
 
-A few resources to get you started if this is your first Flutter project:
+## Tech Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Framework**: Flutter
+- **Language**: Dart
+- **State Management**: Riverpod
+- **Youtube Streaming Extraction**: youtube_explode_dart
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Project Structure
+
+```
+lib/
+├── main.dart          # App entry point
+├── screens/           # Main UI screens
+│   ├── home_screen.dart
+│   └── player_screen.dart
+├── theme/             # Theme for the app
+├── providers/         # Riverpod providers
+├── models/            # Data models
+└── services/          # Services for music streaming and audio playback
+    ├── youtube_service.dart
+    └── audio_handler.dart
+```
