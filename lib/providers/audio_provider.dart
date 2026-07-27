@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../models/lofi_channel.dart';
-import '../services/audio_handler.dart';
+import '../services/audio_service.dart';
 import '../services/youtube_service.dart';
 
 class AudioProvider extends ChangeNotifier {
-  final LofiAudioHandler audioHandler;
+  final AudioService audioService;
   final YoutubeService youtubeService;
 
   List<LofiChannel> _channels = [];
@@ -18,8 +18,6 @@ class AudioProvider extends ChangeNotifier {
   bool _isLoadingStream = false;
   String? _error;
 
-  StreamSubscription? _skipNextSub;
-  StreamSubscription? _skipPrevSub;
   StreamSubscription? _playerStateSub;
   bool _hasSeenOnboardingHint = false;
 
@@ -30,18 +28,14 @@ class AudioProvider extends ChangeNotifier {
   bool get isLoadingPlaylist => _isLoadingPlaylist;
   bool get isLoadingStream => _isLoadingStream;
   String? get error => _error;
-  AudioPlayer get player => audioHandler.player;
-  bool get isPlaying => audioHandler.player.playing;
+  AudioPlayer get player => audioService.player;
+  bool get isPlaying => audioService.player.playing;
   bool get hasCurrentChannel => _currentChannel != null;
   bool get hasSeenOnboardingHint => _hasSeenOnboardingHint;
 
-  AudioProvider({required this.audioHandler, required this.youtubeService}) {
-    // Listen for notification skip controls
-    _skipNextSub = audioHandler.onSkipNext.listen((_) => next());
-    _skipPrevSub = audioHandler.onSkipPrevious.listen((_) => previous());
-
+  AudioProvider({required this.audioService, required this.youtubeService}) {
     // Listen for player state changes to update UI
-    _playerStateSub = audioHandler.player.playerStateStream.listen((_) {
+    _playerStateSub = audioService.player.playerStateStream.listen((_) {
       notifyListeners();
     });
   }
@@ -73,9 +67,9 @@ class AudioProvider extends ChangeNotifier {
 
     try {
       final url = await youtubeService.getAudioStreamUrl(channel.videoId);
-      await audioHandler.setUrl(url);
+      await audioService.setUrl(url);
 
-      await audioHandler.play();
+      await audioService.play();
       _isLoadingStream = false;
     } catch (e) {
       _error = 'Không thể phát: $e';
@@ -86,38 +80,24 @@ class AudioProvider extends ChangeNotifier {
 
   /// Toggle play/pause
   Future<void> togglePlayPause() async {
-    if (audioHandler.player.playing) {
-      await audioHandler.pause();
+    if (audioService.player.playing) {
+      await audioService.pause();
     } else {
-      await audioHandler.play();
+      await audioService.play();
     }
     notifyListeners();
-  }
-
-  /// Play next channel in playlist
-  Future<void> next() async {
-    if (_channels.isEmpty) return;
-    final nextIndex = (_currentIndex + 1) % _channels.length;
-    await playChannel(_channels[nextIndex]);
-  }
-
-  /// Play previous channel in playlist
-  Future<void> previous() async {
-    if (_channels.isEmpty) return;
-    final prevIndex = (_currentIndex - 1 + _channels.length) % _channels.length;
-    await playChannel(_channels[prevIndex]);
   }
 
   double _lastVolume = 1.0;
 
   /// Get current volume (0.0 to 1.0)
-  double get volume => audioHandler.player.volume;
+  double get volume => audioService.player.volume;
   bool get isMuted => volume <= 0.001;
 
   /// Set volume level (clamped between 0.0 and 1.0)
   Future<void> setVolume(double newVolume) async {
     final clampedVolume = newVolume.clamp(0.0, 1.0);
-    await audioHandler.player.setVolume(clampedVolume);
+    await audioService.player.setVolume(clampedVolume);
     if (clampedVolume > 0) {
       _lastVolume = clampedVolume;
     }
@@ -146,7 +126,7 @@ class AudioProvider extends ChangeNotifier {
 
   /// Stop playback
   Future<void> stop() async {
-    await audioHandler.stop();
+    await audioService.stop();
     _currentChannel = null;
     _currentIndex = -1;
     notifyListeners();
@@ -159,8 +139,6 @@ class AudioProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _skipNextSub?.cancel();
-    _skipPrevSub?.cancel();
     _playerStateSub?.cancel();
     youtubeService.dispose();
     super.dispose();

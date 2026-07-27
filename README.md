@@ -29,5 +29,5 @@ lib/
 ├── models/            # Data models
 └── services/          # Services for music streaming and audio playback
     ├── youtube_service.dart
-    └── audio_handler.dart
+    └── audio_service.dart
 ```

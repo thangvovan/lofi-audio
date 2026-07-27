@@ -20,9 +20,7 @@ class LofiChannel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is LofiChannel &&
-          runtimeType == other.runtimeType &&
-          videoId == other.videoId;
+      other is LofiChannel && videoId == other.videoId;
 
   @override
   int get hashCode => videoId.hashCode;

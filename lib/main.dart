@@ -5,25 +5,27 @@ import 'package:provider/provider.dart';
 
 import 'providers/audio_provider.dart';
 import 'screens/home_screen.dart';
-import 'services/audio_handler.dart';
+import 'services/audio_service.dart';
 import 'services/youtube_service.dart';
 import 'theme/app_colors.dart';
 
-late LofiAudioHandler audioHandler;
+late AudioService audioService;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Immersive dark UI
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: AppColors.background,
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: AppColors.background,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
 
   // Initialize audio handler (simple approach without audio_service)
-  audioHandler = LofiAudioHandler();
+  audioService = AudioService();
 
   runApp(const LofiApp());
 }
@@ -37,7 +39,7 @@ class LofiApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => AudioProvider(
-            audioHandler: audioHandler,
+            audioService: audioService,
             youtubeService: YoutubeService(),
           )..loadPlaylist(),
         ),
@@ -64,9 +66,7 @@ class LofiApp extends StatelessWidget {
         onSecondary: Colors.white,
         onSurface: AppColors.onSurface,
       ),
-      textTheme: GoogleFonts.outfitTextTheme(
-        ThemeData.dark().textTheme,
-      ),
+      textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
       useMaterial3: true,
       splashFactory: InkSparkle.splashFactory,
     );
