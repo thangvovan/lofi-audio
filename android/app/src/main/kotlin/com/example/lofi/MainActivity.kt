@@ -1,4 +1,4 @@
-package com.example.lofi
+package com.radio.lofi
 
 import io.flutter.embedding.android.FlutterActivity
 
