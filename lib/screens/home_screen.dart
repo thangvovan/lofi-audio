@@ -98,33 +98,32 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Expanded(
-                  child: Selector<AudioProvider, ({bool loading, String? error, int channelCount})>(
-                    selector: (_, p) => (
-                      loading: p.isLoadingPlaylist,
-                      error: p.error,
-                      channelCount: p.channels.length,
-                    ),
-                    builder: (ctx, state, child) {
-                      final provider = context.read<AudioProvider>();
-                      if (state.loading) return _buildShimmerGrid(context);
-                      if (state.error != null && state.channelCount == 0) {
-                        return _buildError(context, provider);
-                      }
-                      return _buildChannelGrid(context, provider);
-                    },
-                  ),
+                  child:
+                      Selector<
+                        AudioProvider,
+                        ({bool loading, String? error, int channelCount})
+                      >(
+                        selector: (_, p) => (
+                          loading: p.isLoadingPlaylist,
+                          error: p.error,
+                          channelCount: p.channels.length,
+                        ),
+                        builder: (ctx, state, child) {
+                          final provider = context.read<AudioProvider>();
+                          if (state.loading) return _buildShimmerGrid(context);
+                          if (state.error != null && state.channelCount == 0) {
+                            return _buildError(context, provider);
+                          }
+                          return _buildChannelGrid(context, provider);
+                        },
+                      ),
                 ),
               ],
             ),
           ),
 
           // Mini player overlay
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: MiniPlayer(),
-          ),
+          const Positioned(left: 0, right: 0, bottom: 0, child: MiniPlayer()),
         ],
       ),
     );
@@ -152,8 +151,11 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-            child:
-                const Icon(Icons.headphones_rounded, color: AppColors.onSurface, size: 26),
+            child: const Icon(
+              Icons.headphones_rounded,
+              color: AppColors.onSurface,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -163,25 +165,25 @@ class HomeScreen extends StatelessWidget {
                 Text(
                   'LOFI RADIO',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.onSurface,
-                        letterSpacing: 1.5,
-                        fontFamily: 'Outfit',
-                        shadows: [
-                          Shadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                          ),
-                        ],
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onSurface,
+                    letterSpacing: 1.5,
+                    fontFamily: 'Outfit',
+                    shadows: [
+                      Shadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
                       ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   'Chill beats to relax & study',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.inactiveText,
-                        letterSpacing: 0.3,
-                      ),
+                    color: AppColors.inactiveText,
+                    letterSpacing: 0.3,
+                  ),
                 ),
               ],
             ),
@@ -306,16 +308,16 @@ class HomeScreen extends StatelessWidget {
             Text(
               'Không thể tải playlist',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: AppColors.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Kiểm tra kết nối mạng và thử lại',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.inactiveText,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.inactiveText),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -326,8 +328,10 @@ class HomeScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onSurface,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -357,8 +361,11 @@ class HomeScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.info_outline_rounded,
-                color: AppColors.secondary, size: 18),
+            const Icon(
+              Icons.info_outline_rounded,
+              color: AppColors.secondary,
+              size: 18,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -371,8 +378,11 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close_rounded,
-                  color: AppColors.inactiveText, size: 16),
+              icon: const Icon(
+                Icons.close_rounded,
+                color: AppColors.inactiveText,
+                size: 16,
+              ),
               onPressed: provider.dismissOnboardingHint,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
@@ -391,10 +401,7 @@ class _FadeSlideEntrance extends StatefulWidget {
   final Widget child;
   final int index;
 
-  const _FadeSlideEntrance({
-    required this.child,
-    required this.index,
-  });
+  const _FadeSlideEntrance({required this.child, required this.index});
 
   @override
   State<_FadeSlideEntrance> createState() => _FadeSlideEntranceState();
@@ -421,15 +428,13 @@ class _FadeSlideEntranceState extends State<_FadeSlideEntrance>
       ),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.12),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 0.12), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
+          ),
+        );
 
     // Stagger entry delay based on item index (capped at 10 items to prevent lag)
     final staggerIndex = widget.index.clamp(0, 10);

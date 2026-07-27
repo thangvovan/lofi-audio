@@ -146,26 +146,39 @@ class MiniPlayer extends StatelessWidget {
                   ),
                 ),
 
-                // Controls
+                // Controls:  ▶  🔉 80% 🔊
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _ControlButton(
-                      icon: Icons.volume_down_rounded,
-                      onTap: provider.volumeDown,
-                      size: 28,
-                    ),
-                    const SizedBox(width: 4),
                     _PlayPauseButton(
                       isPlaying: provider.isPlaying,
                       isLoading: provider.isLoadingStream,
                       onTap: provider.togglePlayPause,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 8),
+                    _ControlButton(
+                      icon: Icons.volume_down_rounded,
+                      onTap: provider.volumeDown,
+                      label: 'Giảm âm lượng',
+                      size: 20,
+                    ),
+                    SizedBox(
+                      width: 28,
+                      child: Text(
+                        '${(provider.volume * 100).round()}%',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.onSurface.withValues(alpha: 0.45),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                     _ControlButton(
                       icon: Icons.volume_up_rounded,
                       onTap: provider.volumeUp,
-                      size: 28,
+                      label: 'Tăng âm lượng',
+                      size: 20,
                     ),
                   ],
                 ),
@@ -181,28 +194,30 @@ class MiniPlayer extends StatelessWidget {
 class _ControlButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final String label;
   final double size;
 
   const _ControlButton({
     required this.icon,
     required this.onTap,
+    required this.label,
     this.size = 24,
   });
 
   @override
   Widget build(BuildContext context) {
-    final String semanticLabel = icon == Icons.volume_down_rounded
-        ? 'Giảm âm lượng'
-        : 'Tăng âm lượng';
-
     return Semantics(
-      label: semanticLabel,
+      label: label,
       button: true,
       child: BounceScaleWidget(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(10), // Enlarge touch zone to 48x48 dp
-          child: Icon(icon, color: AppColors.onSurface.withValues(alpha: 0.7), size: size),
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            color: AppColors.onSurface.withValues(alpha: 0.7),
+            size: size,
+          ),
         ),
       ),
     );

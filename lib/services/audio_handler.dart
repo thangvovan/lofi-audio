@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:just_audio/just_audio.dart';
 
-/// Audio handler using just_audio directly.
-/// Simplified version without audio_service dependency for reliable startup.
 class LofiAudioHandler {
   final AudioPlayer _player = AudioPlayer();
 

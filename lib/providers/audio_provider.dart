@@ -35,10 +35,7 @@ class AudioProvider extends ChangeNotifier {
   bool get hasCurrentChannel => _currentChannel != null;
   bool get hasSeenOnboardingHint => _hasSeenOnboardingHint;
 
-  AudioProvider({
-    required this.audioHandler,
-    required this.youtubeService,
-  }) {
+  AudioProvider({required this.audioHandler, required this.youtubeService}) {
     // Listen for notification skip controls
     _skipNextSub = audioHandler.onSkipNext.listen((_) => next());
     _skipPrevSub = audioHandler.onSkipPrevious.listen((_) => previous());
@@ -107,9 +104,44 @@ class AudioProvider extends ChangeNotifier {
   /// Play previous channel in playlist
   Future<void> previous() async {
     if (_channels.isEmpty) return;
-    final prevIndex =
-        (_currentIndex - 1 + _channels.length) % _channels.length;
+    final prevIndex = (_currentIndex - 1 + _channels.length) % _channels.length;
     await playChannel(_channels[prevIndex]);
+  }
+
+  double _lastVolume = 1.0;
+
+  /// Get current volume (0.0 to 1.0)
+  double get volume => audioHandler.player.volume;
+  bool get isMuted => volume <= 0.001;
+
+  /// Set volume level (clamped between 0.0 and 1.0)
+  Future<void> setVolume(double newVolume) async {
+    final clampedVolume = newVolume.clamp(0.0, 1.0);
+    await audioHandler.player.setVolume(clampedVolume);
+    if (clampedVolume > 0) {
+      _lastVolume = clampedVolume;
+    }
+    notifyListeners();
+  }
+
+  /// Toggle mute/unmute
+  Future<void> toggleMute() async {
+    if (isMuted) {
+      await setVolume(_lastVolume > 0 ? _lastVolume : 0.8);
+    } else {
+      _lastVolume = volume;
+      await setVolume(0.0);
+    }
+  }
+
+  /// Increase volume by step (default 0.1)
+  Future<void> volumeUp([double step = 0.1]) async {
+    await setVolume(volume + step);
+  }
+
+  /// Decrease volume by step (default 0.1)
+  Future<void> volumeDown([double step = 0.1]) async {
+    await setVolume(volume - step);
   }
 
   /// Stop playback

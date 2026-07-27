@@ -79,7 +79,9 @@ class PlayerScreen extends StatelessWidget {
                             height: 4,
                             margin: const EdgeInsets.only(top: 8),
                             decoration: BoxDecoration(
-                              color: AppColors.onSurface.withValues(alpha: 0.15),
+                              color: AppColors.onSurface.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -89,8 +91,16 @@ class PlayerScreen extends StatelessWidget {
                           child: OrientationBuilder(
                             builder: (context, orientation) {
                               return orientation == Orientation.landscape
-                                  ? _buildLandscapeLayout(context, channel, provider)
-                                  : _buildPortraitLayout(context, channel, provider);
+                                  ? _buildLandscapeLayout(
+                                      context,
+                                      channel,
+                                      provider,
+                                    )
+                                  : _buildPortraitLayout(
+                                      context,
+                                      channel,
+                                      provider,
+                                    );
                             },
                           ),
                         ),
@@ -106,7 +116,11 @@ class PlayerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPortraitLayout(BuildContext context, dynamic channel, AudioProvider provider) {
+  Widget _buildPortraitLayout(
+    BuildContext context,
+    dynamic channel,
+    AudioProvider provider,
+  ) {
     return Column(
       children: [
         _buildAppBar(context),
@@ -150,14 +164,18 @@ class PlayerScreen extends StatelessWidget {
           const SizedBox(height: 32),
         ],
 
-        // Controls
+        // Controls + Volume (single row)
         _buildControls(context, provider),
         const Spacer(flex: 2),
       ],
     );
   }
 
-  Widget _buildLandscapeLayout(BuildContext context, dynamic channel, AudioProvider provider) {
+  Widget _buildLandscapeLayout(
+    BuildContext context,
+    dynamic channel,
+    AudioProvider provider,
+  ) {
     return Column(
       children: [
         _buildAppBar(context),
@@ -225,7 +243,11 @@ class PlayerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorPanel(BuildContext context, AudioProvider provider, dynamic channel) {
+  Widget _buildErrorPanel(
+    BuildContext context,
+    AudioProvider provider,
+    dynamic channel,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Container(
@@ -240,8 +262,11 @@ class PlayerScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline_rounded,
-                color: AppColors.primary, size: 20),
+            const Icon(
+              Icons.error_outline_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -256,8 +281,11 @@ class PlayerScreen extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.refresh_rounded,
-                  color: AppColors.onSurface, size: 20),
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: AppColors.onSurface,
+                size: 20,
+              ),
               onPressed: () => provider.playChannel(channel),
               tooltip: 'Thử lại',
             ),
@@ -274,8 +302,11 @@ class PlayerScreen extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                color: AppColors.onSurface, size: 32),
+            icon: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: AppColors.onSurface,
+              size: 32,
+            ),
             tooltip: 'Đóng',
           ),
           const Expanded(
@@ -319,10 +350,10 @@ class PlayerScreen extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.onSurface,
-                  fontWeight: FontWeight.w700,
-                  height: 1.3,
-                ),
+              color: AppColors.onSurface,
+              fontWeight: FontWeight.w700,
+              height: 1.3,
+            ),
           ),
         ],
       ),
@@ -330,28 +361,49 @@ class PlayerScreen extends StatelessWidget {
   }
 
   Widget _buildControls(BuildContext context, AudioProvider provider) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // Previous
-        _buildControlButton(
-          icon: Icons.skip_previous_rounded,
-          onTap: provider.previous,
-          size: 36,
-          color: AppColors.onSurface,
-        ),
-        const SizedBox(width: 24),
-
-        // Play/Pause (large)
+        // Play / Pause — big, centered
         _buildPlayPauseButton(provider),
-        const SizedBox(width: 24),
-
-        // Next
-        _buildControlButton(
-          icon: Icons.skip_next_rounded,
-          onTap: provider.next,
-          size: 36,
-          color: AppColors.onSurface,
+        const SizedBox(height: 24),
+        // Volume row:  🔉 ───●─── 🔊
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Row(
+            children: [
+              _VolumeButton(
+                icon: Icons.volume_down_rounded,
+                onTap: provider.volumeDown,
+                label: 'Giảm âm lượng',
+              ),
+              Expanded(
+                child: SliderTheme(
+                  data: SliderThemeData(
+                    activeTrackColor: AppColors.primary.withValues(alpha: 0.85),
+                    inactiveTrackColor:
+                        AppColors.onSurface.withValues(alpha: 0.08),
+                    thumbColor: Colors.white,
+                    overlayColor: AppColors.primary.withValues(alpha: 0.1),
+                    trackHeight: 3,
+                    thumbShape:
+                        const RoundSliderThumbShape(enabledThumbRadius: 5),
+                    overlayShape:
+                        const RoundSliderOverlayShape(overlayRadius: 14),
+                  ),
+                  child: Slider(
+                    value: provider.volume,
+                    onChanged: (value) => provider.setVolume(value),
+                  ),
+                ),
+              ),
+              _VolumeButton(
+                icon: Icons.volume_up_rounded,
+                onTap: provider.volumeUp,
+                label: 'Tăng âm lượng',
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -400,37 +452,36 @@ class PlayerScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildControlButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    required double size,
-    required Color color,
-  }) {
-    final String label = icon == Icons.skip_previous_rounded
-        ? 'Kênh trước'
-        : 'Kênh tiếp theo';
+/// Volume +/- button with speaker icon.
+class _VolumeButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final String label;
 
+  const _VolumeButton({
+    required this.icon,
+    required this.onTap,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Semantics(
       label: label,
       button: true,
       child: BounceScaleWidget(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.onSurface.withValues(alpha: 0.05),
-            border: Border.all(
-              color: AppColors.onSurface.withValues(alpha: 0.1),
-              width: 1,
-            ),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            color: AppColors.onSurface.withValues(alpha: 0.5),
+            size: 24,
           ),
-          child: Icon(icon, color: color, size: size),
         ),
       ),
     );
   }
 }
-
-// BounceScaleWidget is defined in mini_player.dart and imported via show clause above.
