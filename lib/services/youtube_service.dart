@@ -77,16 +77,24 @@ class YoutubeService {
   /// For live streams, we fetch the player response from the ANDROID client,
   /// matching python's yt_dlp option `--extractor-args youtube:player_client=android`
   /// which returns the correct HLS (.m3u8) manifest URL.
+  /// We then parse the HLS manifest to extract ONLY the audio-only stream,
+  /// avoiding downloading video data (~10x data savings).
   Future<String> getAudioStreamUrl(String videoId) async {
     final httpClient = ythtp.YoutubeHttpClient();
     final controller = VideoController(httpClient);
 
     try {
-      // 1. Try to get playerResponse using the ANDROID client context (like yt-dlp -f bestaudio/worst)
+      // 1. Try to get playerResponse using the ANDROID client context
       final response = await controller.getPlayerResponse(VideoId(videoId), YoutubeApiClient.android);
       
-      // If it is a live video, extract HLS stream
+      // If it is a live video, extract audio-only stream from HLS manifest
       if (response.isLive && response.hlsManifestUrl != null) {
+        final audioUrl = await _extractAudioOnlyFromHls(response.hlsManifestUrl!);
+        if (audioUrl != null) {
+          return audioUrl;
+        }
+        // Fallback: return full manifest if audio-only extraction fails
+        debugPrint('Could not extract audio-only from HLS, falling back to full manifest');
         return response.hlsManifestUrl!;
       }
     } catch (e) {
@@ -98,13 +106,98 @@ class YoutubeService {
     // 2. Fallback for non-live videos (regular stream extraction)
     try {
       final manifest = await _yt.videos.streamsClient.getManifest(VideoId(videoId));
-      final audioStreams = manifest.audioOnly;
+      final audioStreams = manifest.audioOnly.sortByBitrate();
       if (audioStreams.isNotEmpty) {
-        return audioStreams.withHighestBitrate().url.toString();
+        // Use lowest bitrate to minimize data usage — lofi music sounds
+        // great even at low bitrates.
+        return audioStreams.first.url.toString();
       }
       throw Exception('No audio streams available');
     } catch (e) {
       throw Exception('Cannot extract audio stream: $e');
+    }
+  }
+
+  /// Parses an HLS master playlist (.m3u8) to extract the best low-bandwidth
+  /// stream URL. YouTube live HLS manifests typically contain ONLY muxed
+  /// video+audio variants (no separate audio-only). Strategy:
+  ///   1. First look for audio-only variants (no RESOLUTION=) — ideal case
+  ///   2. If none found, select the LOWEST bandwidth muxed variant (e.g. 144p)
+  ///      to minimize data usage (~2MB/min vs ~9MB/min for auto-selected)
+  Future<String?> _extractAudioOnlyFromHls(String hlsManifestUrl) async {
+    try {
+      final response = await http.get(
+        Uri.parse(hlsManifestUrl),
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        debugPrint('[HLS] Failed to fetch manifest: ${response.statusCode}');
+        return null;
+      }
+
+      final manifest = response.body;
+      final lines = manifest.split('\n');
+
+      // Collect ALL variants, separating audio-only from muxed
+      int? lowestAudioOnlyBw;
+      String? lowestAudioOnlyUrl;
+      int? lowestMuxedBw;
+      String? lowestMuxedUrl;
+
+      for (int i = 0; i < lines.length - 1; i++) {
+        final line = lines[i].trim();
+        if (!line.startsWith('#EXT-X-STREAM-INF')) continue;
+
+        // The URL is on the next line
+        final urlLine = lines[i + 1].trim();
+        if (urlLine.isEmpty || urlLine.startsWith('#')) continue;
+
+        final bwMatch = RegExp(r'BANDWIDTH=(\d+)').firstMatch(line);
+        final bandwidth = bwMatch != null ? int.tryParse(bwMatch.group(1)!) : null;
+        final hasResolution = line.contains('RESOLUTION=');
+
+        if (!hasResolution) {
+          // Audio-only variant (ideal)
+          if (bandwidth != null) {
+            if (lowestAudioOnlyBw == null || bandwidth < lowestAudioOnlyBw) {
+              lowestAudioOnlyBw = bandwidth;
+              lowestAudioOnlyUrl = urlLine;
+            }
+          } else {
+            lowestAudioOnlyUrl ??= urlLine;
+          }
+        } else {
+          // Muxed video+audio variant
+          if (bandwidth != null) {
+            if (lowestMuxedBw == null || bandwidth < lowestMuxedBw) {
+              lowestMuxedBw = bandwidth;
+              lowestMuxedUrl = urlLine;
+            }
+          }
+        }
+      }
+
+      // Prefer audio-only if available
+      if (lowestAudioOnlyUrl != null) {
+        debugPrint('[HLS] ✓ Audio-only stream found: bandwidth=$lowestAudioOnlyBw');
+        return lowestAudioOnlyUrl;
+      }
+
+      // Fallback: use lowest bandwidth muxed variant (e.g. 144p ~250kbps)
+      // Much better than letting ExoPlayer auto-select (usually 480p+ ~1.3Mbps)
+      if (lowestMuxedUrl != null) {
+        debugPrint('[HLS] ⚠ No audio-only variant. Using lowest muxed: bandwidth=$lowestMuxedBw (144p)');
+        return lowestMuxedUrl;
+      }
+
+      debugPrint('[HLS] ✗ No variants found in manifest');
+      return null;
+    } catch (e) {
+      debugPrint('[HLS] Error parsing manifest: $e');
+      return null;
     }
   }
 

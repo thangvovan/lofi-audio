@@ -9,11 +9,13 @@ class LofiChannel {
     this.duration,
   });
 
+  /// Low-quality thumbnail for cards (320x180, ~8-15KB)
   String get thumbnailUrl =>
-      'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+      'https://img.youtube.com/vi/$videoId/mqdefault.jpg';
 
+  /// Medium-quality thumbnail for player screen (480x360, ~15-30KB)
   String get maxThumbnailUrl =>
-      'https://img.youtube.com/vi/$videoId/maxresdefault.jpg';
+      'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
 
   bool get isLive => duration == null || duration == Duration.zero;
 

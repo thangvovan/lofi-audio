@@ -202,53 +202,47 @@ class HomeScreen extends StatelessWidget {
       crossAxisCount = 3;
     }
 
-    return RefreshIndicator(
-      color: AppColors.primary,
-      backgroundColor: AppColors.surface,
-      onRefresh: provider.loadPlaylist,
-      child: GridView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(
-          16,
-          8,
-          16,
-          // Extra padding for mini player
-          provider.hasCurrentChannel
-              ? MediaQuery.of(context).padding.bottom + 90
-              : MediaQuery.of(context).padding.bottom + 16,
-        ),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 16 / 13,
-        ),
-        itemCount: provider.channels.length,
-        itemBuilder: (context, index) {
-          final channel = provider.channels[index];
-          final isCurrentlyPlaying = provider.currentChannel == channel;
-
-          // RepaintBoundary per card: each card's spinning reel animation
-          // won't dirty its grid siblings
-          return RepaintBoundary(
-            child: _FadeSlideEntrance(
-              index: index,
-              child: ChannelCard(
-                channel: channel,
-                isCurrentlyPlaying: isCurrentlyPlaying,
-                isPlaying: isCurrentlyPlaying && provider.isPlaying,
-                onTap: () {
-                  if (isCurrentlyPlaying) {
-                    provider.togglePlayPause();
-                  } else {
-                    provider.playChannel(channel);
-                  }
-                },
-              ),
-            ),
-          );
-        },
+    return GridView.builder(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        8,
+        16,
+        // Extra padding for mini player
+        provider.hasCurrentChannel
+            ? MediaQuery.of(context).padding.bottom + 90
+            : MediaQuery.of(context).padding.bottom + 16,
       ),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 16 / 13,
+      ),
+      itemCount: provider.channels.length,
+      itemBuilder: (context, index) {
+        final channel = provider.channels[index];
+        final isCurrentlyPlaying = provider.currentChannel == channel;
+
+        // RepaintBoundary per card: each card's spinning reel animation
+        // won't dirty its grid siblings
+        return RepaintBoundary(
+          child: _FadeSlideEntrance(
+            index: index,
+            child: ChannelCard(
+              channel: channel,
+              isCurrentlyPlaying: isCurrentlyPlaying,
+              isPlaying: isCurrentlyPlaying && provider.isPlaying,
+              onTap: () {
+                if (isCurrentlyPlaying) {
+                  provider.togglePlayPause();
+                } else {
+                  provider.playChannel(channel);
+                }
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -322,7 +316,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: provider.loadPlaylist,
+              onPressed: provider.retryLoadPlaylist,
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('Thử lại'),
               style: ElevatedButton.styleFrom(

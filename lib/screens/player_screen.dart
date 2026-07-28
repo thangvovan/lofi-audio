@@ -43,6 +43,7 @@ class PlayerScreen extends StatelessWidget {
                   CachedNetworkImage(
                     imageUrl: channel.maxThumbnailUrl,
                     fit: BoxFit.cover,
+                    memCacheWidth: 480,
                     errorWidget: (context, url, error) =>
                         Container(color: AppColors.background),
                   ),

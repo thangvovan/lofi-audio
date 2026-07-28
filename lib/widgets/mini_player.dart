@@ -82,6 +82,7 @@ class MiniPlayer extends StatelessWidget {
                       width: 44,
                       height: 44,
                       fit: BoxFit.cover,
+                      memCacheWidth: 88,
                       errorWidget: (context, url, error) => Container(
                         width: 44,
                         height: 44,

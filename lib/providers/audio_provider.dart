@@ -40,8 +40,11 @@ class AudioProvider extends ChangeNotifier {
     });
   }
 
-  /// Load the hardcoded playlist
+  /// Load the hardcoded playlist (once only — skips if already loaded)
   Future<void> loadPlaylist() async {
+    // Only load once to minimize data usage
+    if (_channels.isNotEmpty) return;
+
     _isLoadingPlaylist = true;
     _error = null;
     notifyListeners();
@@ -54,6 +57,12 @@ class AudioProvider extends ChangeNotifier {
       _isLoadingPlaylist = false;
     }
     notifyListeners();
+  }
+
+  /// Force reload playlist
+  Future<void> retryLoadPlaylist() async {
+    _channels = [];
+    await loadPlaylist();
   }
 
   /// Play a specific channel
