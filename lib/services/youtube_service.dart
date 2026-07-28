@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import 'package:youtube_explode_dart/src/reverse_engineering/youtube_http_client.dart'
-    as ythtp;
-import 'package:youtube_explode_dart/src/videos/video_controller.dart';
 import '../models/radio_channel.dart';
 
 class YoutubeService {
@@ -17,6 +14,12 @@ class YoutubeService {
     final url = Uri.parse(
       'https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
     );
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    };
 
     final body = {
       'browseId': 'VL$playlistId',
@@ -33,11 +36,7 @@ class YoutubeService {
     try {
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
+        headers: headers,
         body: json.encode(body),
       );
 
@@ -75,27 +74,41 @@ class YoutubeService {
 
   // Extracts the direct audio stream URL for a video
   Future<String> getAudioStreamUrl(String videoId) async {
-    final httpClient = ythtp.YoutubeHttpClient();
-    final controller = VideoController(httpClient);
+    final httpClient = YoutubeHttpClient();
 
     try {
-      // Try to get playerResponse using the ANDROID client context
-      final response = await controller.getPlayerResponse(
-        VideoId(videoId),
-        YoutubeApiClient.android,
+      // Fetch live HLS stream manifest URL using Android client context
+      final api = YoutubeApiClient.android;
+      final payload = api.payload;
+      final userAgent = payload['context']?['client']?['userAgent'] as String?;
+
+      final body = {...payload, 'videoId': videoId};
+      final Map<String, String> headers = {
+        'User-Agent': ?userAgent,
+        'X-Youtube-Client-Name': payload['context']!['client']!['clientName'],
+        'X-Youtube-Client-Version':
+            payload['context']!['client']!['clientVersion'],
+        'Origin': 'https://www.youtube.com',
+        'Sec-Fetch-Mode': 'navigate',
+        'Content-Type': 'application/json',
+        ...api.headers,
+      };
+
+      final responseStr = await httpClient.postString(
+        api.apiUrl,
+        body: body,
+        headers: headers,
       );
 
-      // If it is a live video, extract audio-only stream from HLS manifest
-      if (!response.isLive || response.hlsManifestUrl == null) {
+      final data = json.decode(responseStr);
+      final String? hlsManifestUrl = data['streamingData']?['hlsManifestUrl'];
+
+      if (hlsManifestUrl == null || hlsManifestUrl.isEmpty) {
         throw Exception();
       }
 
-      final audioUrl = await _extractAudioOnlyFromHls(response.hlsManifestUrl!);
-      if (audioUrl != null) {
-        return audioUrl;
-      }
-      // Return full manifest if audio-only extraction fails
-      return response.hlsManifestUrl!;
+      final audioUrl = await _extractAudioOnlyFromHls(hlsManifestUrl);
+      return audioUrl ?? hlsManifestUrl;
     } catch (e) {
       // Fallback for non-live videos
       final manifest = await _yt.videos.streamsClient.getManifest(
@@ -106,7 +119,7 @@ class YoutubeService {
         // Use lowest bitrate to minimize data usage
         return audioStreams.first.url.toString();
       }
-      throw Exception('No audio streams available');
+      throw Exception('Cannot extract audio stream');
     } finally {
       httpClient.close();
     }
@@ -115,12 +128,14 @@ class YoutubeService {
   // Parses an HLS master playlist to extract the best low-bandwidth stream URL
   Future<String?> _extractAudioOnlyFromHls(String hlsManifestUrl) async {
     try {
+      final headers = {
+        'User-Agent':
+            'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
+      };
+
       final response = await http.get(
         Uri.parse(hlsManifestUrl),
-        headers: {
-          'User-Agent':
-              'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36',
-        },
+        headers: headers,
       );
 
       if (response.statusCode != 200) {
