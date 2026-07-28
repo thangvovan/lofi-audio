@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
-import '../models/lofi_channel.dart';
+import '../models/radio_channel.dart';
 import '../services/audio_service.dart';
 import '../services/youtube_service.dart';
 
@@ -11,8 +11,8 @@ class AudioProvider extends ChangeNotifier {
   final AudioService audioService;
   final YoutubeService youtubeService;
 
-  List<LofiChannel> _channels = [];
-  LofiChannel? _currentChannel;
+  List<RadioChannel> _channels = [];
+  RadioChannel? _currentChannel;
   int _currentIndex = -1;
   bool _isLoadingPlaylist = true;
   bool _isLoadingStream = false;
@@ -22,8 +22,8 @@ class AudioProvider extends ChangeNotifier {
   bool _hasSeenOnboardingHint = false;
 
   // Getters
-  List<LofiChannel> get channels => _channels;
-  LofiChannel? get currentChannel => _currentChannel;
+  List<RadioChannel> get channels => _channels;
+  RadioChannel? get currentChannel => _currentChannel;
   int get currentIndex => _currentIndex;
   bool get isLoadingPlaylist => _isLoadingPlaylist;
   bool get isLoadingStream => _isLoadingStream;
@@ -66,7 +66,7 @@ class AudioProvider extends ChangeNotifier {
   }
 
   /// Play a specific channel
-  Future<void> playChannel(LofiChannel channel) async {
+  Future<void> playChannel(RadioChannel channel) async {
     _isLoadingStream = true;
     _currentChannel = channel;
     _currentIndex = _channels.indexOf(channel);

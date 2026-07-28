@@ -3,13 +3,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../models/lofi_channel.dart';
+import '../models/radio_channel.dart';
 import '../theme/app_colors.dart';
 
 /// A bold, retro-themed Channel Card shaped like a mini physical cassette tape.
 /// Its reels spin dynamically when active, creating a unified retro visual system.
 class ChannelCard extends StatefulWidget {
-  final LofiChannel channel;
+  final RadioChannel channel;
   final bool isCurrentlyPlaying;
   final bool isPlaying;
   final VoidCallback onTap;
@@ -213,7 +213,8 @@ class _ChannelCardState extends State<ChannelCard>
                           animation: _rotationController,
                           builder: (context, child) {
                             return _MiniReelWidget(
-                              rotation: -_rotationController.value * 2 * pi + 0.5,
+                              rotation:
+                                  -_rotationController.value * 2 * pi + 0.5,
                               size: 20,
                             );
                           },
@@ -234,11 +235,16 @@ class _ChannelCardState extends State<ChannelCard>
                     height: 6,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: widget.isPlaying ? AppColors.primary : AppColors.secondary,
+                      color: widget.isPlaying
+                          ? AppColors.primary
+                          : AppColors.secondary,
                       boxShadow: [
                         BoxShadow(
-                          color: (widget.isPlaying ? AppColors.primary : AppColors.secondary)
-                              .withValues(alpha: 0.8),
+                          color:
+                              (widget.isPlaying
+                                      ? AppColors.primary
+                                      : AppColors.secondary)
+                                  .withValues(alpha: 0.8),
                           blurRadius: 4,
                           spreadRadius: 1,
                         ),
@@ -299,19 +305,13 @@ class _MiniReelWidget extends StatelessWidget {
   final double rotation;
   final double size;
 
-  const _MiniReelWidget({
-    required this.rotation,
-    required this.size,
-  });
+  const _MiniReelWidget({required this.rotation, required this.size});
 
   @override
   Widget build(BuildContext context) {
     return Transform.rotate(
       angle: rotation,
-      child: CustomPaint(
-        size: Size(size, size),
-        painter: _MiniReelPainter(),
-      ),
+      child: CustomPaint(size: Size(size, size), painter: _MiniReelPainter()),
     );
   }
 }

@@ -1,9 +1,9 @@
-class LofiChannel {
+class RadioChannel {
   final String title;
   final String videoId;
   final Duration? duration;
 
-  const LofiChannel({
+  const RadioChannel({
     required this.title,
     required this.videoId,
     this.duration,
@@ -22,7 +22,7 @@ class LofiChannel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is LofiChannel && videoId == other.videoId;
+      other is RadioChannel && videoId == other.videoId;
 
   @override
   int get hashCode => videoId.hashCode;
