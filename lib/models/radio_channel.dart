@@ -1,11 +1,11 @@
 class RadioChannel {
-  final String title;
   final String videoId;
+  final String title;
   final Duration? duration;
 
   const RadioChannel({
-    required this.title,
     required this.videoId,
+    required this.title,
     this.duration,
   });
 

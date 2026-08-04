@@ -54,15 +54,24 @@ class YoutubeService {
         throw Exception();
       }
 
+      final usedTitlesSet = <String>{};
+
       for (var item in contents) {
         final lockup = item['lockupViewModel'];
         if (lockup != null) {
           final videoId = lockup['contentId'];
-          final title =
+          final rawTitle =
               lockup['metadata']?['lockupMetadataViewModel']?['title']?['content'] ??
               'Unknown Title';
           if (videoId != null) {
-            channels.add(RadioChannel(title: title, videoId: videoId));
+            final String formattedTitle;
+            if (channels.isEmpty) {
+              formattedTitle = 'Lofi Radio';
+              usedTitlesSet.add('Lofi Radio');
+            } else {
+              formattedTitle = _filterChannelTitle(rawTitle, usedTitlesSet);
+            }
+            channels.add(RadioChannel(videoId: videoId, title: formattedTitle));
           }
         }
       }
@@ -70,6 +79,59 @@ class YoutubeService {
     } catch (e) {
       throw Exception('Error fetching playlist');
     }
+  }
+
+  // Capitalizes the first letter of each word (Title Case)
+  static String _capitalizeWords(String text) {
+    return text
+        .split(' ')
+        .map((w) {
+          if (w.isEmpty) return w;
+          return w[0].toUpperCase() + w.substring(1).toLowerCase();
+        })
+        .join(' ');
+  }
+
+  // Filters channel title
+  static String _filterChannelTitle(
+    String rawTitle,
+    Set<String> usedTitlesSet,
+  ) {
+    final emojiRegex = RegExp(
+      r'[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]',
+      unicode: true,
+    );
+
+    // Extract title part before emoji
+    final String titlePart = rawTitle.split(emojiRegex).first;
+
+    final words = titlePart
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+
+    if (words.isEmpty) return _capitalizeWords(rawTitle);
+
+    // Take last 3 words by default
+    int takeCount = 3;
+    if (words.length < takeCount) {
+      takeCount = words.length;
+    }
+
+    String selectedWords = words.sublist(words.length - takeCount).join(' ');
+    String formattedTitle = _capitalizeWords(selectedWords);
+
+    // Check if title already exists in set
+    if (usedTitlesSet.contains(formattedTitle) && words.length > 3) {
+      // Include 4th word from the end
+      selectedWords = words.sublist(words.length - 4).join(' ');
+      formattedTitle = _capitalizeWords(selectedWords);
+    }
+
+    usedTitlesSet.add(formattedTitle);
+
+    return formattedTitle;
   }
 
   // Extracts the direct audio stream URL for a video

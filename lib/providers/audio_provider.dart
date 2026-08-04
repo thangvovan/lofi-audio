@@ -29,6 +29,7 @@ class AudioProvider extends ChangeNotifier {
   bool get isLoadingStream => _isLoadingStream;
   String? get error => _error;
   AudioPlayer get player => audioService.player;
+  double get volume => audioService.player.volume;
   bool get isPlaying => audioService.player.playing;
   bool get hasCurrentChannel => _currentChannel != null;
   bool get hasSeenOnboardingHint => _hasSeenOnboardingHint;
@@ -40,11 +41,8 @@ class AudioProvider extends ChangeNotifier {
     });
   }
 
-  /// Load the hardcoded playlist (once only — skips if already loaded)
+  // Load the hardcoded playlist
   Future<void> loadPlaylist() async {
-    // Only load once to minimize data usage
-    if (_channels.isNotEmpty) return;
-
     _isLoadingPlaylist = true;
     _error = null;
     notifyListeners();
@@ -53,23 +51,23 @@ class AudioProvider extends ChangeNotifier {
       _channels = await youtubeService.fetchPlaylist();
       _isLoadingPlaylist = false;
     } catch (e) {
-      _error = 'Không thể tải playlist: $e';
+      _error = 'Không thể tải playlist';
       _isLoadingPlaylist = false;
     }
     notifyListeners();
   }
 
-  /// Force reload playlist
+  // Force reload playlist
   Future<void> retryLoadPlaylist() async {
     _channels = [];
     await loadPlaylist();
   }
 
-  /// Play a specific channel
+  // Play a specific channel
   Future<void> playChannel(RadioChannel channel) async {
-    _isLoadingStream = true;
     _currentChannel = channel;
     _currentIndex = _channels.indexOf(channel);
+    _isLoadingStream = true;
     _error = null;
     _hasSeenOnboardingHint = true; // Auto-dismiss hint on first play
     notifyListeners();
@@ -81,13 +79,13 @@ class AudioProvider extends ChangeNotifier {
       await audioService.play();
       _isLoadingStream = false;
     } catch (e) {
-      _error = 'Không thể phát: $e';
+      _error = 'Không thể phát';
       _isLoadingStream = false;
     }
     notifyListeners();
   }
 
-  /// Toggle play/pause
+  // Toggle play/pause
   Future<void> togglePlayPause() async {
     if (audioService.player.playing) {
       await audioService.pause();
@@ -97,43 +95,24 @@ class AudioProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  double _lastVolume = 1.0;
-
-  /// Get current volume (0.0 to 1.0)
-  double get volume => audioService.player.volume;
-  bool get isMuted => volume <= 0.001;
-
-  /// Set volume level (clamped between 0.0 and 1.0)
+  // Set volume level
   Future<void> setVolume(double newVolume) async {
     final clampedVolume = newVolume.clamp(0.0, 1.0);
     await audioService.player.setVolume(clampedVolume);
-    if (clampedVolume > 0) {
-      _lastVolume = clampedVolume;
-    }
     notifyListeners();
   }
 
-  /// Toggle mute/unmute
-  Future<void> toggleMute() async {
-    if (isMuted) {
-      await setVolume(_lastVolume > 0 ? _lastVolume : 0.8);
-    } else {
-      _lastVolume = volume;
-      await setVolume(0.0);
-    }
-  }
-
-  /// Increase volume by step (default 0.1)
+  // Increase volume by step
   Future<void> volumeUp([double step = 0.1]) async {
     await setVolume(volume + step);
   }
 
-  /// Decrease volume by step (default 0.1)
+  // Decrease volume by step
   Future<void> volumeDown([double step = 0.1]) async {
     await setVolume(volume - step);
   }
 
-  /// Stop playback
+  // Stop playback
   Future<void> stop() async {
     await audioService.stop();
     _currentChannel = null;
