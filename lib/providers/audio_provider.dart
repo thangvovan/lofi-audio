@@ -19,7 +19,6 @@ class AudioProvider extends ChangeNotifier {
   String? _error;
 
   StreamSubscription? _playerStateSub;
-  bool _hasSeenOnboardingHint = false;
 
   // Getters
   List<RadioChannel> get channels => _channels;
@@ -32,7 +31,6 @@ class AudioProvider extends ChangeNotifier {
   double get volume => audioService.player.volume;
   bool get isPlaying => audioService.player.playing;
   bool get hasCurrentChannel => _currentChannel != null;
-  bool get hasSeenOnboardingHint => _hasSeenOnboardingHint;
 
   AudioProvider({required this.audioService, required this.youtubeService}) {
     // Listen for player state changes to update UI
@@ -50,11 +48,12 @@ class AudioProvider extends ChangeNotifier {
     try {
       _channels = await youtubeService.fetchPlaylist();
       _isLoadingPlaylist = false;
+      notifyListeners();
     } catch (e) {
       _error = 'Không thể tải playlist';
       _isLoadingPlaylist = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   // Force reload playlist
@@ -69,20 +68,20 @@ class AudioProvider extends ChangeNotifier {
     _currentIndex = _channels.indexOf(channel);
     _isLoadingStream = true;
     _error = null;
-    _hasSeenOnboardingHint = true; // Auto-dismiss hint on first play
     notifyListeners();
 
     try {
       final url = await youtubeService.getAudioStreamUrl(channel.videoId);
       await audioService.setUrl(url);
-
-      await audioService.play();
       _isLoadingStream = false;
+      notifyListeners();
+
+      audioService.play();
     } catch (e) {
       _error = 'Không thể phát';
       _isLoadingStream = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   // Toggle play/pause
@@ -117,11 +116,6 @@ class AudioProvider extends ChangeNotifier {
     await audioService.stop();
     _currentChannel = null;
     _currentIndex = -1;
-    notifyListeners();
-  }
-
-  void dismissOnboardingHint() {
-    _hasSeenOnboardingHint = true;
     notifyListeners();
   }
 

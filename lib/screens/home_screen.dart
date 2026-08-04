@@ -85,17 +85,6 @@ class HomeScreen extends StatelessWidget {
               children: [
                 // Header is fully static — no Consumer needed
                 _buildHeader(context),
-                Selector<AudioProvider, ({bool hasSeenHint, bool hasChannel})>(
-                  selector: (_, p) => (
-                    hasSeenHint: p.hasSeenOnboardingHint,
-                    hasChannel: p.hasCurrentChannel,
-                  ),
-                  builder: (ctx, state, child) {
-                    // Pass a thin proxy so _buildOnboardingHint can call provider
-                    final provider = context.read<AudioProvider>();
-                    return _buildOnboardingHint(context, provider);
-                  },
-                ),
                 const SizedBox(height: 8),
                 Expanded(
                   child:
@@ -330,57 +319,6 @@ class HomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOnboardingHint(BuildContext context, AudioProvider provider) {
-    if (provider.hasSeenOnboardingHint || provider.hasCurrentChannel) {
-      return const SizedBox.shrink();
-    }
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.secondary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.secondary.withValues(alpha: 0.2),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.info_outline_rounded,
-              color: AppColors.secondary,
-              size: 18,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Chọn một cuộn băng cassette để bắt đầu nghe nhạc lofi.',
-                style: TextStyle(
-                  color: AppColors.onSurface.withValues(alpha: 0.7),
-                  fontSize: 12,
-                  height: 1.4,
-                ),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.close_rounded,
-                color: AppColors.inactiveText,
-                size: 16,
-              ),
-              onPressed: provider.dismissOnboardingHint,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              tooltip: 'Đóng gợi ý',
             ),
           ],
         ),
