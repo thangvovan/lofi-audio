@@ -24,7 +24,7 @@ Future<void> main() async {
     ),
   );
 
-  // Initialize audio handler (simple approach without audio_service)
+  // Initialize audio handler
   audioService = AudioService();
 
   runApp(const LofiApp());
@@ -32,6 +32,25 @@ Future<void> main() async {
 
 class LofiApp extends StatelessWidget {
   const LofiApp({super.key});
+
+  ThemeData _buildTheme() {
+    return ThemeData(
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: AppColors.background,
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        tertiary: AppColors.tertiary,
+        surface: AppColors.surface,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: AppColors.onSurface,
+      ),
+      textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
+      useMaterial3: true,
+      splashFactory: InkSparkle.splashFactory,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,25 +69,6 @@ class LofiApp extends StatelessWidget {
         theme: _buildTheme(),
         home: const HomeScreen(),
       ),
-    );
-  }
-
-  ThemeData _buildTheme() {
-    return ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.background,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
-        tertiary: AppColors.tertiary,
-        surface: AppColors.surface,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: AppColors.onSurface,
-      ),
-      textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
-      useMaterial3: true,
-      splashFactory: InkSparkle.splashFactory,
     );
   }
 }

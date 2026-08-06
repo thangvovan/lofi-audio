@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Background gradient — static, never needs rebuilding
+          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -32,7 +32,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Decorative circles — static
+          // Decorative circles
           Positioned(
             top: -60,
             right: -40,
@@ -68,7 +68,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Particle background — Selector only on isPlaying to avoid rebuilds
+          // Particle background
           Positioned.fill(
             child: Selector<AudioProvider, bool>(
               selector: (_, p) => p.isPlaying,
@@ -78,12 +78,11 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Main content — Selector on the fields the column actually uses
+          // Main content
           SafeArea(
             bottom: false,
             child: Column(
               children: [
-                // Header is fully static — no Consumer needed
                 _buildHeader(context),
                 const SizedBox(height: 8),
                 Expanded(
@@ -212,8 +211,7 @@ class HomeScreen extends StatelessWidget {
         final channel = provider.channels[index];
         final isCurrentlyPlaying = provider.currentChannel == channel;
 
-        // RepaintBoundary per card: each card's spinning reel animation
-        // won't dirty its grid siblings
+        // RepaintBoundary per card
         return RepaintBoundary(
           child: _FadeSlideEntrance(
             index: index,
@@ -327,8 +325,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// Staggered fade and slide-up entrance animation for grid items.
-/// Bypasses animation if prefers-reduced-motion is requested.
+// Staggered fade and slide-up entrance animation for grid items.
 class _FadeSlideEntrance extends StatefulWidget {
   final Widget child;
   final int index;
@@ -368,7 +365,7 @@ class _FadeSlideEntranceState extends State<_FadeSlideEntrance>
           ),
         );
 
-    // Stagger entry delay based on item index (capped at 10 items to prevent lag)
+    // Stagger entry delay based on item index
     final staggerIndex = widget.index.clamp(0, 10);
     final delay = Duration(milliseconds: staggerIndex * 40);
     Future.delayed(delay, () {
@@ -376,12 +373,6 @@ class _FadeSlideEntranceState extends State<_FadeSlideEntrance>
         _controller.forward();
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -403,5 +394,11 @@ class _FadeSlideEntranceState extends State<_FadeSlideEntrance>
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

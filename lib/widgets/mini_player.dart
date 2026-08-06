@@ -28,17 +28,20 @@ class MiniPlayer extends StatelessWidget {
                     const PlayerScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 1),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    )),
-                    child: child,
-                  );
-                },
+                      return SlideTransition(
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(0, 1),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
+                        child: child,
+                      );
+                    },
                 transitionDuration: const Duration(milliseconds: 400),
               ),
             );
@@ -87,8 +90,11 @@ class MiniPlayer extends StatelessWidget {
                         width: 44,
                         height: 44,
                         color: AppColors.shimmerHighlight,
-                        child: const Icon(Icons.music_note,
-                            color: AppColors.inactiveText, size: 20),
+                        child: const Icon(
+                          Icons.music_note,
+                          color: AppColors.inactiveText,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
@@ -125,17 +131,22 @@ class MiniPlayer extends StatelessWidget {
                             )
                           else if (provider.isPlaying)
                             const PlayingIndicator(
-                                size: 12, color: AppColors.primary)
+                              size: 12,
+                              color: AppColors.primary,
+                            )
                           else
-                            const Icon(Icons.pause,
-                                size: 12, color: AppColors.inactiveText),
+                            const Icon(
+                              Icons.pause,
+                              size: 12,
+                              color: AppColors.inactiveText,
+                            ),
                           const SizedBox(width: 6),
                           Text(
                             provider.isLoadingStream
                                 ? 'Đang tải...'
                                 : provider.isPlaying
-                                    ? 'Đang phát'
-                                    : 'Tạm dừng',
+                                ? 'Đang phát'
+                                : 'Tạm dừng',
                             style: const TextStyle(
                               color: AppColors.inactiveText,
                               fontSize: 11,
@@ -147,7 +158,7 @@ class MiniPlayer extends StatelessWidget {
                   ),
                 ),
 
-                // Controls:  ▶  🔉 80% 🔊
+                // Controls
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -244,7 +255,7 @@ class _PlayPauseButton extends StatelessWidget {
       child: BounceScaleWidget(
         onTap: isLoading ? () {} : onTap,
         child: Padding(
-          padding: const EdgeInsets.all(6), // Enlarge touch zone from 36 to 48 dp
+          padding: const EdgeInsets.all(6), // Enlarge touch zone
           child: Container(
             width: 36,
             height: 36,
@@ -263,9 +274,7 @@ class _PlayPauseButton extends StatelessWidget {
                     ),
                   )
                 : Icon(
-                    isPlaying
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
+                    isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                     color: AppColors.onSurface,
                     size: 22,
                   ),
@@ -276,7 +285,7 @@ class _PlayPauseButton extends StatelessWidget {
   }
 }
 
-/// A tactile button widget that scales down slightly on press.
+// A tactile button widget that scales down slightly on press.
 class BounceScaleWidget extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
@@ -299,20 +308,15 @@ class _BounceScaleWidgetState extends State<BounceScaleWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-      lowerBound: 0.0,
-      upperBound: 0.1,
-    )..addListener(() {
-        setState(() {});
-      });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    _controller =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 100),
+          lowerBound: 0.0,
+          upperBound: 0.1,
+        )..addListener(() {
+          setState(() {});
+        });
   }
 
   @override
@@ -327,10 +331,13 @@ class _BounceScaleWidgetState extends State<BounceScaleWidget>
       },
       onTapCancel: () => _controller.reverse(),
       behavior: HitTestBehavior.opaque,
-      child: Transform.scale(
-        scale: _scale,
-        child: widget.child,
-      ),
+      child: Transform.scale(scale: _scale, child: widget.child),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

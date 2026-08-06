@@ -2,16 +2,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// An audio-reactive, high-performance particle background widget.
-/// Simulates floating celestial dust and cosmic sparks that react to the play state.
-/// Respects OS-level accessibility "reduced motion" flags.
+// An audio-reactive, high-performance particle background widget.
 class SpaceNebulaBg extends StatefulWidget {
   final bool isPlaying;
 
-  const SpaceNebulaBg({
-    super.key,
-    required this.isPlaying,
-  });
+  const SpaceNebulaBg({super.key, required this.isPlaying});
 
   @override
   State<SpaceNebulaBg> createState() => _SpaceNebulaBgState();
@@ -33,12 +28,6 @@ class _SpaceNebulaBgState extends State<SpaceNebulaBg>
     )..repeat();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   void _initParticles(Size size) {
     _screenSize = size;
     _particles.clear();
@@ -53,7 +42,7 @@ class _SpaceNebulaBgState extends State<SpaceNebulaBg>
       } else if (colorRand < 0.65) {
         color = AppColors.secondary; // Soft Deep Violet
       } else {
-        color = AppColors.tertiary.withValues(alpha: 0.8); // Deep Teal/Blue
+        color = AppColors.tertiary.withValues(alpha: 0.8); // Deep Teal
       }
 
       _particles.add(
@@ -61,7 +50,7 @@ class _SpaceNebulaBgState extends State<SpaceNebulaBg>
           x: _random.nextDouble() * size.width,
           y: _random.nextDouble() * size.height,
           vx: (_random.nextDouble() - 0.5) * 0.3,
-          vy: -(_random.nextDouble() * 0.4 + 0.1), // Float upwards
+          vy: -(_random.nextDouble() * 0.4 + 0.1),
           size: _random.nextDouble() * 3.0 + 1.5,
           opacity: _random.nextDouble() * 0.5 + 0.15,
           color: color,
@@ -72,9 +61,29 @@ class _SpaceNebulaBgState extends State<SpaceNebulaBg>
     }
   }
 
+  void _updateParticles(Size size) {
+    // Tweak speed based on active playback state
+    final double speedFactor = widget.isPlaying ? 1.5 : 0.25;
+
+    for (final p in _particles) {
+      // Dynamic sine-wave drift to create fluid cosmic movement
+      p.x += (p.vx + sin(p.pulsePhase) * 0.05) * speedFactor;
+      p.y += p.vy * speedFactor;
+      p.pulsePhase += p.pulseSpeed * (widget.isPlaying ? 2.0 : 0.5);
+
+      // Boundary wraps
+      if (p.x < 0) p.x = size.width;
+      if (p.x > size.width) p.x = 0;
+      if (p.y < 0) {
+        p.y = size.height;
+        p.x = _random.nextDouble() * size.width;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Respect user's system accessibility "reduced motion" settings
+    // Respect user's system accessibility reduced motion settings
     final bool disableAnimations = MediaQuery.of(context).disableAnimations;
 
     return LayoutBuilder(
@@ -118,24 +127,10 @@ class _SpaceNebulaBgState extends State<SpaceNebulaBg>
     );
   }
 
-  void _updateParticles(Size size) {
-    // Tweak speed based on active playback state
-    final double speedFactor = widget.isPlaying ? 1.5 : 0.25;
-
-    for (final p in _particles) {
-      // Dynamic sine-wave drift to create fluid cosmic movement
-      p.x += (p.vx + sin(p.pulsePhase) * 0.05) * speedFactor;
-      p.y += p.vy * speedFactor;
-      p.pulsePhase += p.pulseSpeed * (widget.isPlaying ? 2.0 : 0.5);
-
-      // Boundary wraps
-      if (p.x < 0) p.x = size.width;
-      if (p.x > size.width) p.x = 0;
-      if (p.y < 0) {
-        p.y = size.height;
-        p.x = _random.nextDouble() * size.width;
-      }
-    }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 
@@ -168,7 +163,7 @@ class _ParticleFieldPainter extends CustomPainter {
   final bool isPlaying;
   final double animationValue;
 
-  // Reusable Paint instances — created once, not per-frame
+  // Reusable Paint instances
   final Paint _fillPaint = Paint()..style = PaintingStyle.fill;
   final Paint _glowPaint = Paint()
     ..style = PaintingStyle.fill
@@ -189,7 +184,7 @@ class _ParticleFieldPainter extends CustomPainter {
 
       _fillPaint.color = p.color.withValues(alpha: finalOpacity);
 
-      // Draw a soft glowing halo for active states (only large particles)
+      // Draw a soft glowing halo for active states
       if (isPlaying && p.size > 2.5) {
         _glowPaint.color = p.color.withValues(alpha: finalOpacity * 0.2);
         canvas.drawCircle(Offset(p.x, p.y), p.size * 2.2, _glowPaint);
@@ -205,10 +200,9 @@ class _ParticleFieldPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ParticleFieldPainter oldDelegate) {
-    // When playing: always repaint (particles are moving)
-    // When paused: only repaint if isPlaying state changed (not every frame)
+    // Always repaint if playing else only repaint if isPlaying state changed
     if (oldDelegate.isPlaying != isPlaying) return true;
-    if (!isPlaying) return false; // Paused — no movement needed
+    if (!isPlaying) return false; // No movement needed
     return true;
   }
 }

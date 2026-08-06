@@ -6,8 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../models/radio_channel.dart';
 import '../theme/app_colors.dart';
 
-/// A bold, retro-themed Channel Card shaped like a mini physical cassette tape.
-/// Its reels spin dynamically when active, creating a unified retro visual system.
+// A bold, retro-themed Channel Card shaped like a mini physical cassette tape.
 class ChannelCard extends StatefulWidget {
   final RadioChannel channel;
   final bool isCurrentlyPlaying;
@@ -55,12 +54,6 @@ class _ChannelCardState extends State<ChannelCard>
   }
 
   @override
-  void dispose() {
-    _rotationController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
@@ -88,7 +81,7 @@ class _ChannelCardState extends State<ChannelCard>
           borderRadius: BorderRadius.circular(14),
           child: Stack(
             children: [
-              // 1. Painted Cassette Deck Outlines
+              // Painted Cassette Deck Outlines
               Positioned.fill(
                 child: CustomPaint(
                   painter: _CardCassetteBodyPainter(
@@ -97,7 +90,7 @@ class _ChannelCardState extends State<ChannelCard>
                 ),
               ),
 
-              // 2. Sticker Label (carrying the title)
+              // Sticker Label
               Positioned(
                 left: 10,
                 right: 10,
@@ -129,7 +122,7 @@ class _ChannelCardState extends State<ChannelCard>
                 ),
               ),
 
-              // 3. Clear window cutout revealing the thumbnail inside
+              // Clear window cutout revealing the thumbnail inside
               Positioned(
                 left: 20,
                 right: 20,
@@ -143,8 +136,7 @@ class _ChannelCardState extends State<ChannelCard>
                         child: CachedNetworkImage(
                           imageUrl: widget.channel.thumbnailUrl,
                           fit: BoxFit.cover,
-                          // Limit in-memory decode size; cards are ~170px wide at
-                          // 2-column layout, 320 covers 2x HiDPI without waste
+                          // Limit in-memory decode size
                           memCacheWidth: 320,
                           placeholder: (context, url) => Shimmer.fromColors(
                             baseColor: AppColors.shimmerBase,
@@ -225,7 +217,7 @@ class _ChannelCardState extends State<ChannelCard>
                 ),
               ),
 
-              // 4. Glowing indicator LED (Red for playing, orange for live badge)
+              // Glowing indicator LED
               if (widget.channel.isLive)
                 Positioned(
                   top: 14,
@@ -258,9 +250,15 @@ class _ChannelCardState extends State<ChannelCard>
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
 }
 
-/// Paints subtle structural lines on the cassette plastic tape shell.
+// Paints subtle structural lines on the cassette plastic tape shell.
 class _CardCassetteBodyPainter extends CustomPainter {
   final bool isCurrentlyPlaying;
 
@@ -281,16 +279,16 @@ class _CardCassetteBodyPainter extends CustomPainter {
     canvas.drawLine(Offset(0, h * 0.78), Offset(w, h * 0.78), linePaint);
 
     // Bottom center plastic trapezoid insert
-    final notchPaint = Paint()
-      ..color = AppColors.background.withValues(alpha: 0.3)
-      ..style = PaintingStyle.fill;
-
     final path = Path()
       ..moveTo(w * 0.28, h)
       ..lineTo(w * 0.34, h * 0.94)
       ..lineTo(w * 0.66, h * 0.94)
       ..lineTo(w * 0.72, h)
       ..close();
+
+    final notchPaint = Paint()
+      ..color = AppColors.background.withValues(alpha: 0.3)
+      ..style = PaintingStyle.fill;
     canvas.drawPath(path, notchPaint);
   }
 
@@ -300,7 +298,7 @@ class _CardCassetteBodyPainter extends CustomPainter {
   }
 }
 
-/// A compact spindle widget placed inside the cassette window.
+// A compact spindle widget placed inside the cassette window.
 class _MiniReelWidget extends StatelessWidget {
   final double rotation;
   final double size;
@@ -316,7 +314,7 @@ class _MiniReelWidget extends StatelessWidget {
   }
 }
 
-/// Paints a small 4-spoke circular gear for the mini cassette cards.
+// Paints a small 4-spoke circular gear for the mini cassette cards.
 class _MiniReelPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -330,12 +328,12 @@ class _MiniReelPainter extends CustomPainter {
     canvas.drawCircle(center, radius, outerPaint);
 
     // 4 spokes representing the spindle gear teeth
+    final spokeDist = radius * 0.45;
+    final spokeRadius = radius * 0.15;
+
     final spokePaint = Paint()
       ..color = AppColors.onSurface.withValues(alpha: 0.54)
       ..style = PaintingStyle.fill;
-
-    final spokeDist = radius * 0.45;
-    final spokeRadius = radius * 0.15;
     for (int i = 0; i < 4; i++) {
       final angle = i * pi / 2;
       final spokeCenter = Offset(

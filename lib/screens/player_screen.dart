@@ -31,11 +31,7 @@ class PlayerScreen extends StatelessWidget {
           child: Scaffold(
             body: PopScope(
               canPop: true,
-              onPopInvokedWithResult: (didPop, result) {
-                if (didPop) {
-                  // Reset status bar brightness when popping player screen
-                }
-              },
+              onPopInvokedWithResult: (didPop, result) {},
               child: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -64,7 +60,7 @@ class PlayerScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Particle background overlay — isolated repaint layer
+                  // Particle background overlay
                   RepaintBoundary(
                     child: SpaceNebulaBg(isPlaying: provider.isPlaying),
                   ),
@@ -127,7 +123,7 @@ class PlayerScreen extends StatelessWidget {
         _buildAppBar(context),
         const Spacer(flex: 1),
 
-        // Album art (Animated Pixel Cassette Player) — isolated repaint layer
+        // Album art
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Hero(
@@ -165,7 +161,7 @@ class PlayerScreen extends StatelessWidget {
           const SizedBox(height: 32),
         ],
 
-        // Controls + Volume (single row)
+        // Controls
         _buildControls(context, provider),
         const Spacer(flex: 2),
       ],
@@ -183,7 +179,7 @@ class PlayerScreen extends StatelessWidget {
         Expanded(
           child: Row(
             children: [
-              // Left half: Cassette Player + Visualizer
+              // Left half
               Expanded(
                 flex: 5,
                 child: Column(
@@ -219,7 +215,7 @@ class PlayerScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              // Right half: Title + Controls + Error state
+              // Right half
               Expanded(
                 flex: 5,
                 child: Column(
@@ -241,58 +237,6 @@ class PlayerScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildErrorPanel(
-    BuildContext context,
-    AudioProvider provider,
-    dynamic channel,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              color: AppColors.primary,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                provider.error!,
-                style: const TextStyle(
-                  color: AppColors.onSurface,
-                  fontSize: 12,
-                  height: 1.3,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.refresh_rounded,
-                color: AppColors.onSurface,
-                size: 20,
-              ),
-              onPressed: () => provider.playChannel(channel),
-              tooltip: 'Thử lại',
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -361,14 +305,66 @@ class PlayerScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildErrorPanel(
+    BuildContext context,
+    AudioProvider provider,
+    dynamic channel,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                provider.error!,
+                style: const TextStyle(
+                  color: AppColors.onSurface,
+                  fontSize: 12,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: AppColors.onSurface,
+                size: 20,
+              ),
+              onPressed: () => provider.playChannel(channel),
+              tooltip: 'Thử lại',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildControls(BuildContext context, AudioProvider provider) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Play / Pause — big, centered
+        // Play / Pause
         _buildPlayPauseButton(provider),
         const SizedBox(height: 24),
-        // Volume row:  🔉 ───●─── 🔊
+        // Volume row
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Row(
@@ -382,15 +378,18 @@ class PlayerScreen extends StatelessWidget {
                 child: SliderTheme(
                   data: SliderThemeData(
                     activeTrackColor: AppColors.primary.withValues(alpha: 0.85),
-                    inactiveTrackColor:
-                        AppColors.onSurface.withValues(alpha: 0.08),
+                    inactiveTrackColor: AppColors.onSurface.withValues(
+                      alpha: 0.08,
+                    ),
                     thumbColor: Colors.white,
                     overlayColor: AppColors.primary.withValues(alpha: 0.1),
                     trackHeight: 3,
-                    thumbShape:
-                        const RoundSliderThumbShape(enabledThumbRadius: 5),
-                    overlayShape:
-                        const RoundSliderOverlayShape(overlayRadius: 14),
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 5,
+                    ),
+                    overlayShape: const RoundSliderOverlayShape(
+                      overlayRadius: 14,
+                    ),
                   ),
                   child: Slider(
                     value: provider.volume,
@@ -455,7 +454,7 @@ class PlayerScreen extends StatelessWidget {
   }
 }
 
-/// Volume +/- button with speaker icon.
+/// Volume button with speaker icon.
 class _VolumeButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;

@@ -3,9 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// Animated audio visualizer bars that animate when playing.
-/// Uses a single AnimationController + CustomPainter for efficient rendering
-/// instead of N individual controllers (one per bar).
+// Animated audio visualizer bars that animate when playing.
 class AudioVisualizer extends StatefulWidget {
   final bool isPlaying;
   final Color color;
@@ -30,7 +28,7 @@ class _AudioVisualizerState extends State<AudioVisualizer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
-  // Pre-generated per-bar random seeds so each bar has unique phase/frequency
+  // Pre-generated per-bar random seeds so each bar has unique phase
   late final List<double> _phases;
   late final List<double> _frequencies;
   late final List<double> _minHeights;
@@ -41,7 +39,7 @@ class _AudioVisualizerState extends State<AudioVisualizer>
   void initState() {
     super.initState();
 
-    // One controller driving the whole painter — replaces N controllers
+    // One controller driving the whole painter
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
@@ -80,12 +78,6 @@ class _AudioVisualizerState extends State<AudioVisualizer>
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: SizedBox(
@@ -110,6 +102,12 @@ class _AudioVisualizerState extends State<AudioVisualizer>
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 
@@ -142,33 +140,30 @@ class _VisualizerPainter extends CustomPainter {
     final fillPaint = Paint()..style = PaintingStyle.fill;
     final glowPaint = isPlaying
         ? (Paint()
-          ..style = PaintingStyle.fill
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6))
+            ..style = PaintingStyle.fill
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6))
         : null;
 
     for (int i = 0; i < barCount; i++) {
-      // Calculate bar height: sine wave with per-bar phase & frequency
+      // Calculate bar height
       double heightFraction;
       if (isPlaying) {
         final t = animValue * 2 * pi * frequencies[i] + phases[i];
-        heightFraction = (minHeights[i] + (sin(t) * 0.5 + 0.5) *
-            (0.5 + _peakBoost(i, barCount) * 0.4))
-            .clamp(0.05, 1.0);
+        heightFraction =
+            (minHeights[i] +
+                    (sin(t) * 0.5 + 0.5) *
+                        (0.5 + _peakBoost(i, barCount) * 0.4))
+                .clamp(0.05, 1.0);
       } else {
         // Gently settle bars to min height when paused
         final t = animValue * 2 * pi * 0.5 + phases[i];
         heightFraction = (minHeights[i] + sin(t) * 0.04).clamp(0.05, 0.25);
       }
 
-      final barHeight = size.height * heightFraction;
       final x = startX + i * (barWidth + spacing);
+      final barHeight = size.height * heightFraction;
       final rect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          x,
-          size.height - barHeight,
-          barWidth,
-          barHeight,
-        ),
+        Rect.fromLTWH(x, size.height - barHeight, barWidth, barHeight),
         Radius.circular(barWidth / 2),
       );
 
@@ -178,18 +173,18 @@ class _VisualizerPainter extends CustomPainter {
         canvas.drawRRect(rect, glowPaint);
       }
 
-      // Draw the bar with gradient-like opacity shift (bottom bright, top soft)
+      // Draw the bar with gradient-like opacity shift
       final opacity = isPlaying ? (0.55 + heightFraction * 0.45) : 0.35;
       fillPaint.color = color.withValues(alpha: opacity.clamp(0.0, 1.0));
       canvas.drawRRect(rect, fillPaint);
     }
   }
 
-  /// Boost heights toward the center to create a natural dome shape.
+  // Boost heights toward the center to create a natural dome shape.
   double _peakBoost(int i, int count) {
     final center = (count - 1) / 2;
     final dist = (i - center).abs() / center;
-    return 1.0 - dist * 0.5; // 100% at center, 50% at edges
+    return 1.0 - dist * 0.5;
   }
 
   @override
@@ -201,7 +196,7 @@ class _VisualizerPainter extends CustomPainter {
   }
 }
 
-/// Small playing indicator (3 bars) for channel cards
+// Small playing indicator for channel cards
 class PlayingIndicator extends StatefulWidget {
   final Color color;
   final double size;
@@ -219,7 +214,7 @@ class PlayingIndicator extends StatefulWidget {
 class _PlayingIndicatorState extends State<PlayingIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  static const _barPhases = [0.0, 2.09, 4.19]; // 0, 2π/3, 4π/3
+  static const _barPhases = [0.0, 2.09, 4.19];
 
   @override
   void initState() {
@@ -228,12 +223,6 @@ class _PlayingIndicatorState extends State<PlayingIndicator>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   @override
@@ -262,5 +251,11 @@ class _PlayingIndicatorState extends State<PlayingIndicator>
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
