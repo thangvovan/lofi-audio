@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/audio_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'services/audio_service.dart';
 import 'services/youtube_service.dart';
 import 'theme/app_colors.dart';
@@ -67,7 +67,7 @@ class LofiApp extends StatelessWidget {
         title: 'Lofi Radio',
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
-        home: const HomeScreen(),
+        home: const SplashScreen(),
       ),
     );
   }
