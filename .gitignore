@@ -21,6 +21,9 @@ migrate_working_dir/
 .impeccable/
 .vscode/
 
+key.properties
+upload-keystore.jks
+
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
