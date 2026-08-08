@@ -8,7 +8,7 @@
 PRODUCT_NAME = Lofi Radio
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.radio.lofi
+PRODUCT_BUNDLE_IDENTIFIER = com.thangvovan.lofiradio
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.radio. All rights reserved.
