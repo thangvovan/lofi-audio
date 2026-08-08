@@ -1,4 +1,4 @@
-package com.radio.lofi
+package com.thangvovan.lofiradio
 
 import io.flutter.embedding.android.FlutterActivity
 
